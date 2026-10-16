@@ -27,6 +27,7 @@ h2{font-size:1.45rem; margin:3.6em 0 .9em; padding:.35em .8em;
   border-left:6px solid var(--accent); border-radius:0 6px 6px 0; background:#f0fafa;}
 h3{font-size:1.12rem; margin:2.4em 0 .6em; padding-bottom:.3em; border-bottom:1px solid var(--line);}
 h2 + h3{margin-top:1.2em;}
+h4{font-size:1rem; margin:1.8em 0 .5em; scroll-margin-top:1em;}
 p{margin:.85em 0}
 a{color:var(--accent);}
 ul,ol{margin:.8em 0 1.1em; padding-left:1.6em}
@@ -118,6 +119,7 @@ p.tier{margin:1.8em 0 .4em; font-size:.85rem; font-weight:700; color:#a3661b; le
   <div class="head">目次</div>
   <a href="#goal">0. この資料について</a>
   <a class="sub" href="#setup">事前準備</a>
+  <a class="sub" href="#repo">リポジトリを用意する</a>
   <a href="#arch">1. 全体像（アーキテクチャ）</a>
   <a href="#theme">2. 題材と共通の流れ</a>
   <a class="sub" href="#cards">題材カード</a>
@@ -165,6 +167,21 @@ p.tier{margin:1.8em 0 .4em; font-size:.85rem; font-weight:700; color:#a3661b; le
   <li><strong>アカウント</strong>：Claude（Pro 以上）、GitHub、Cloudflare</li>
   <li><strong>ツール</strong>：Claude Code、Node.js 24 以上、git、wrangler（<code>npm install -g wrangler</code>）</li>
 </ul>
+<h4 id="repo">リポジトリを用意する</h4>
+<div class="tbd">
+  <p><b>【未定】リポジトリの場所は当日講師から指示します。</b></p>
+  <ul>
+    <li>リポジトリの URL：<code>&lt;当日指示&gt;</code></li>
+    <li>フォルダ名：<code>&lt;当日指示&gt;</code></li>
+  </ul>
+</div>
+<p>ターミナルで次を1行ずつ実行し、リポジトリを手元に持ってきて、そのフォルダに移動します。<code>&lt; &gt;</code> は上の値に置き換えてください。</p>
+<div class="blk-label term">ターミナルで実行</div>
+<pre class="term"><code>git clone &lt;リポジトリの URL&gt;
+cd &lt;フォルダ名&gt;</code></pre>
+<p class="note">2回目以降（ターミナルを開き直したときなど）は <code>git clone</code> は不要です。<code>cd &lt;フォルダ名&gt;</code> でフォルダに移動するだけで構いません。このフォルダが、以降の説明でいう<strong>リポジトリ直下</strong>です。</p>
+
+<h4 id="files">最初に置く2つのファイル</h4>
 <p>リポジトリ直下（いちばん上のフォルダ）に、次の2つのファイルを作ります。置き場所は次のとおりです。</p>
 <div class="blk-label ref">参考（実行しない）</div>
 <pre><code>リポジトリ直下/
@@ -355,7 +372,7 @@ audit=true</code></pre>
 <h3 id="s1">[1] 壁打ちで要件を決め、spec.md にまとめる</h3>
 <p>いきなり画面を作らず、まず<strong>何を作るか</strong>を班で決めます。Claude Code に<strong>聞き役</strong>をしてもらい、質問に答えながら機能やルールを炙り出します。決めるのは自分たちで、AI は質問と整理を手伝うだけです。</p>
 <ol>
-  <li>リポジトリ直下で Claude Code を開く。</li>
+  <li>リポジトリ直下（<a href="#repo">リポジトリを用意する</a>で移動したフォルダ）で Claude Code を開く。</li>
   <li>次のプロンプトをコピーして Claude Code の入力欄に貼る。</li>
   <li>自分の題材カードを開いて「カードの中身をコピー」を押し、プロンプトの <code>&lt; &gt;</code> の行と置き換えて送る。書き換えるのは<strong>この1か所だけ</strong>です。</li>
   <li>質問に1つずつ、班で相談して答える。迷ったら題材カードの「ヒント：機能の例」も見てよい。</li>
