@@ -69,6 +69,7 @@ pre{position:relative;}
 .copy-btn.done{opacity:1; background:var(--accent); border-color:var(--accent);}
 pre code{display:block; padding-right:4.5em;}
 .table-wrap{overflow-x:auto; margin:1.1em 0;}
+table.opts th:last-child, table.opts td:last-child{white-space:nowrap;}
 table{border-collapse:collapse; width:100%; font-size:.92rem; background:#fff; border:1px solid var(--line);}
 th,td{padding:9px 12px; border:1px solid var(--line); text-align:left; vertical-align:top;}
 td:first-child{white-space:nowrap;}
@@ -130,6 +131,7 @@ p.tier{margin:1.8em 0 .4em; font-size:.85rem; font-weight:700; color:#a3661b; le
   <a class="sub" href="#s4">[4] バックエンドと結合</a>
   <a class="sub" href="#s5">[5] 確認とレビュー</a>
   <a class="sub" href="#s6">[6] 公開（任意）</a>
+  <a class="sub" href="#extra">時間が余ったら</a>
   <a href="#git">4. Git の扱い</a>
   <a href="#tips">5. 困ったとき</a>
 </nav>
@@ -542,6 +544,48 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
 </ol>
 <p class="warn"><code>frontend/</code> で deploy すると API がつながりません。必ず <code>backend/</code> から deploy してください。</p>
 
+<h3 id="extra">時間が余ったら（オプション）</h3>
+<p>[5] まで終わって時間が余った班は、次のオプションに挑戦してください。やるかどうか、どれをやるかは班で決めて構いません。<strong>下の表はサンプルです。</strong>自分たちで考えたものでも大丈夫です。</p>
+
+<p>オプションも、いきなり実装を頼まずに <strong>spec.md を直してから実装</strong>します。[1] と同じく、何を足すかを決めるのは自分たちです。</p>
+<div class="blk-label prompt">Claude Code に送る</div>
+<pre><code>spec.md に次の機能を足したい。
+&lt;足したい機能を1〜2文で&gt;
+
+まず、spec.md の「機能」「ルール」「画面」「やらないこと」をどう直すかの案を見せて。
+私たちが OK と言ったら spec.md を直して、そのあと実装して。
+新しいルールがあれば、ルール違反になるリクエストを API に直接送り、弾かれることを確かめて報告して。</code></pre>
+
+<p><strong>どの題材でもできるもの</strong>（★ は難しさの目安。★ = 30分前後、★★ = 1時間前後）</p>
+<div class="table-wrap"><table class="opts">
+<thead><tr><th>オプション</th><th>中身</th><th>使うもの</th><th>難しさ</th></tr></thead>
+<tbody>
+<tr><td>検索・絞り込み</td><td>一覧にキーワード検索や、条件での絞り込みを付ける</td><td>なし</td><td>★</td></tr>
+<tr><td>Slack に通知</td><td>登録や変更があったら Slack のチャンネルに知らせる</td><td>Slack の Incoming Webhook</td><td>★★</td></tr>
+<tr><td>ルールの自動テスト</td><td>spec.md のルールが守られているかを、コマンド1つで毎回確かめられるようにする</td><td>Vitest</td><td>★★</td></tr>
+</tbody></table></div>
+
+<p><strong>題材ごとのもの</strong></p>
+<div class="table-wrap"><table class="opts">
+<thead><tr><th>題材</th><th>オプション</th><th>中身</th><th>使うもの</th><th>難しさ</th></tr></thead>
+<tbody>
+<tr><td>備品管理システム</td><td>QR コードで貸出</td><td>備品ごとに QR コードを作って棚に貼る。読み取ると、その備品を借りる画面が開く</td><td>QR コードを作るライブラリ</td><td>★</td></tr>
+<tr><td>面談日程調整</td><td>カレンダーに追加</td><td>予約が決まったら、Google カレンダーなどに予定を入れるボタンを出す</td><td>.ics ファイル（API 不要）</td><td>★</td></tr>
+<tr><td>会議室予約</td><td>チェックインがなければ自動で解放</td><td>開始10分後までに「使っています」を押さないと、予約を自動でキャンセルして空ける</td><td>Cloudflare の Cron Triggers</td><td>★★</td></tr>
+<tr><td>日報システム</td><td>AI でチームの要約</td><td>その日の全員分の日報を、AI が数行に要約する</td><td>Workers AI</td><td>★★</td></tr>
+<tr><td>置き菓子リクエスト</td><td>予算内の購入リスト</td><td>月の予算を入れると、人気順に予算に収まる組み合わせを選ぶ</td><td>なし</td><td>★</td></tr>
+<tr><td>定時退社宣言ボード</td><td>帰りの天気</td><td>宣言した時刻の天気を出し、「雨が降る前に帰ろう」と後押しする</td><td>Open-Meteo（登録不要の天気 API）</td><td>★</td></tr>
+<tr><td>飲食店ガチャ</td><td>地図に表示</td><td>ガチャで出た店を地図に表示する</td><td>Leaflet ＋ OpenStreetMap（登録不要）</td><td>★★</td></tr>
+</tbody></table></div>
+
+<div class="tbd">
+  <p><b>【未定】外部サービスの準備は当日講師から指示します。</b></p>
+  <ul>
+    <li>Slack に通知するときの、通知先のチャンネルと Webhook の URL</li>
+  </ul>
+</div>
+<p class="note">API キーや Webhook の URL のような秘密の値は、<code>backend/.dev.vars</code> に書いてください。事前準備の <code>.claude/settings.json</code> で、Claude Code は <code>.dev.vars</code> を読めないようにしてあるので、値が AI に送られません。Claude Code には「<code>.dev.vars</code> の <code>SLACK_WEBHOOK_URL</code> を使って」のように、<strong>名前だけ</strong>を伝えます。</p>
+
 <h2 id="git">4. Git の扱い</h2>
 <div class="tbd">
   <p><b>【未定】班での Git の運用は当日講師から指示します。</b></p>
@@ -557,7 +601,7 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
   <li><strong>トップ以外の URL を直接開くと 404 になる</strong> → <code>assets.not_found_handling</code> が <code>"single-page-application"</code> になっているか確認する。</li>
   <li><strong>API が <code>no such table</code> を返す</strong> → <code>--local</code>（本番なら <code>--remote</code>）でマイグレーションを適用し忘れていないか確認する。</li>
   <li><strong>何がおかしいか分からない</strong> → エラーメッセージと「何をしたら、何が起きたか」をそのまま Claude Code に貼る。</li>
-  <li>時間が余ったら、新しい機能を考えて Claude Code に実装を頼んでみてください。</li>
+  <li>時間が余ったら、<a href="#extra">時間が余ったら（オプション）</a>に挑戦してみてください。</li>
 </ul>
 
 <p class="foot">Webツール開発ワークショップ</p>
