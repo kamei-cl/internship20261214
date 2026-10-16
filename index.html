@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Webツール開発ワークショップ</title>
+<style>
+:root{
+  --bg:#d6d3ca; --paper:#fffdf8; --ink:#2d2a24; --muted:#6b6453;
+  --accent:#0d9488; --accent-deep:#0f766e; --gold:#c8a96a; --line:#e7e1d3;
+  --code-bg:#f3efe4; --warn-bg:#fcf3e6; --warn-bd:#e3b873;
+  --danger-bg:#fef0ec; --danger-bd:#dc6931; --danger-text:#8a3010;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,system-ui,sans-serif;
+  line-height:1.85; font-size:16px;
+}
+.wrap{margin-left:260px; padding:56px 28px 120px;}
+article{
+  max-width:920px; margin:0 auto;
+  background:var(--paper); border:1px solid var(--line); border-radius:16px;
+  padding:48px 56px; box-shadow:0 8px 40px rgba(60,50,30,.06);
+}
+h1,h2,h3{font-family:"Hiragino Mincho ProN","Yu Mincho",serif; line-height:1.4; scroll-margin-top:1em;}
+h1{font-size:2rem; margin:0 0 .6em; padding-bottom:.5em; border-bottom:3px solid var(--gold);}
+h2{font-size:1.45rem; margin:3.6em 0 .9em; padding:.35em .8em;
+  border-left:6px solid var(--accent); border-radius:0 6px 6px 0; background:#f0fafa;}
+h3{font-size:1.12rem; margin:2.4em 0 .6em; padding-bottom:.3em; border-bottom:1px solid var(--line);}
+h2 + h3{margin-top:1.2em;}
+p{margin:.85em 0}
+a{color:var(--accent);}
+ul,ol{margin:.8em 0 1.1em; padding-left:1.6em}
+li{margin:.35em 0}
+li::marker{color:var(--gold)}
+ol>li{margin:1em 0;}
+code{background:var(--code-bg); padding:.12em .42em; border-radius:5px; font-size:.9em;
+  font-family:"SFMono-Regular",Menlo,Consolas,monospace; color:#7a4f2a;}
+pre{background:#2d2a24; color:#f4efe4; padding:18px 20px; border-radius:10px; overflow:auto;
+  font-size:.86rem; line-height:1.6; margin:1.1em 0; white-space:pre-wrap;}
+pre code{background:none; color:inherit; padding:0; font-size:.95em;}
+p.note{margin:.9em 0; padding:.7em 1.1em; background:#f5f2ea; border-left:3px solid var(--line);
+  border-radius:0 6px 6px 0; font-size:.92rem; color:var(--muted);}
+p.key{margin:1em 0; padding:.9em 1.2em; background:var(--warn-bg);
+  border-left:5px solid var(--warn-bd); border-radius:0 8px 8px 0; color:#5c4a2e;}
+p.warn{margin:1em 0; padding:.85em 1.2em; background:var(--danger-bg);
+  border-left:5px solid var(--danger-bd); border-radius:0 8px 8px 0; color:var(--danger-text); font-size:.97rem;}
+h3.done{padding:.55em .95em; background:#e6fafa; border-bottom:none;
+  border-left:5px solid var(--accent); border-radius:0 8px 8px 0; color:var(--accent-deep); font-size:1.05rem;}
+.blk-label{display:block; width:fit-content; margin:1.2em 0 0; line-height:1.6; padding:.15em .7em; border-radius:6px 6px 0 0; font-size:.78rem; font-weight:700; letter-spacing:.03em; color:#fff;}
+.blk-label + pre{margin-top:0; border-top-left-radius:0;}
+.blk-label.prompt{background:var(--accent);}
+.blk-label.design{background:#7c5cbf;}
+.blk-label.term{background:#1f2937;}
+.blk-label.file{background:#a3661b;}
+.blk-label.ref{background:#8a8272;}
+pre.term{background:#111827; color:#e5e7eb; border-left:4px solid #4b5563;}
+ul.legend{list-style:none; padding-left:0;}
+ul.legend li{display:flex; flex-wrap:wrap; align-items:center; gap:6px; font-size:.9rem;}
+ul.legend .blk-label{display:inline-block; margin:0; border-radius:6px;}
+pre{position:relative;}
+.copy-btn{position:absolute; top:8px; right:8px; padding:.2em .7em; border:1px solid rgba(255,255,255,.25); border-radius:6px;
+  background:rgba(255,255,255,.08); color:#f4efe4; font-size:.75rem; font-family:inherit; cursor:pointer; opacity:.75; transition:opacity .15s, background .15s;}
+.copy-btn:hover, .copy-btn:focus-visible{opacity:1; background:rgba(255,255,255,.18);}
+.card-copy{display:inline-block; margin:.6em 0 .2em; padding:.25em .9em; border:1px solid var(--accent); border-radius:6px;
+  background:#fff; color:var(--accent-deep); font-size:.82rem; font-family:inherit; cursor:pointer;}
+.card-copy:hover, .card-copy:focus-visible{background:#e6fafa;}
+.card-copy.done{background:var(--accent); color:#fff;}
+.copy-btn.done{opacity:1; background:var(--accent); border-color:var(--accent);}
+pre code{display:block; padding-right:4.5em;}
+.table-wrap{overflow-x:auto; margin:1.1em 0;}
+table{border-collapse:collapse; width:100%; font-size:.92rem; background:#fff; border:1px solid var(--line);}
+th,td{padding:9px 12px; border:1px solid var(--line); text-align:left; vertical-align:top;}
+td:first-child{white-space:nowrap;}
+thead th{background:var(--accent); color:#fff; font-weight:600; border-color:var(--accent);}
+tbody tr:nth-child(even){background:#faf7ef}
+.flow{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:1.2em 0; font-weight:700;}
+.flow span{background:#e6fafa; border:1px solid #b5e3de; color:var(--accent-deep); padding:.35em .9em; border-radius:999px;}
+.flow i{color:var(--gold); font-style:normal;}
+.flow span.own{background:var(--warn-bg); border-color:var(--warn-bd); color:#7a4f2a;}
+.arch{width:100%; height:auto; display:block; margin:1.2em 0;}
+.tbd{border:2px dashed var(--warn-bd); border-radius:10px; padding:.6em 1.2em; background:#fffaf0;}
+.tbd b{color:#a3661b;}
+details.spec{margin:1.1em 0; border:1px solid var(--line); border-radius:10px; background:#fbf9f2; padding:0 1.1em;}
+details.spec>summary{cursor:pointer; padding:.7em .2em; font-weight:600; color:var(--accent-deep);}
+details.spec[open]{padding-bottom:.6em;}
+details.card{margin:.7em 0; border:1px solid var(--line); border-radius:10px; background:#fbf9f2; padding:0 1.1em;}
+details.card>summary{cursor:pointer; padding:.7em .2em; font-weight:700; color:var(--accent-deep);}
+details.card[open]{padding-bottom:.6em;}
+details.card dl{margin:.2em 0 .4em;}
+details.card dt{font-size:.82rem; font-weight:700; color:var(--muted); margin-top:.7em;}
+details.card dd{margin:.2em 0 0; font-size:.92rem;}
+details.card dd ul{margin:.2em 0; padding-left:1.3em;}
+details.card dd li{margin:.15em 0;}
+details.card dd.req{background:#fff; border:1px solid var(--line); border-radius:8px; padding:.6em .9em; line-height:1.8;}
+details.hint{margin:.8em 0 .2em; font-size:.88rem;}
+details.hint>summary{cursor:pointer; color:var(--muted);}
+details.hint .chips{margin-top:.5em;}
+.chips{display:flex; flex-wrap:wrap; gap:6px;}
+.chips span{background:#fff; border:1px solid var(--line); border-radius:999px; padding:.1em .75em; font-size:.85rem;}
+p.tier{margin:1.8em 0 .4em; font-size:.85rem; font-weight:700; color:#a3661b; letter-spacing:.05em;}
+#toc{position:fixed; top:0; left:0; width:260px; height:100vh; overflow-y:auto;
+  background:var(--paper); border-right:1px solid var(--line); padding:3em 18px 24px;}
+#toc .head{font-family:"Hiragino Mincho ProN","Yu Mincho",serif; color:var(--muted);
+  border-bottom:2px solid var(--line); padding-bottom:8px; margin-bottom:10px;}
+#toc a{display:block; padding:.28em .5em; border-radius:5px; text-decoration:none; color:var(--ink); font-size:.88rem;}
+#toc a:hover{background:var(--code-bg); color:var(--accent);}
+#toc a.sub{padding-left:1.4em; font-size:.84rem; color:var(--muted);}
+.foot{text-align:center; color:var(--muted); font-size:.8rem; margin-top:30px}
+@media(max-width:900px){
+  #toc{display:none;}
+  .wrap{margin-left:0; padding:16px 0 80px;}
+  article{padding:28px 16px; border-radius:0;}
+}
+</style>
+</head>
+<body>
+<nav id="toc">
+  <div class="head">目次</div>
+  <a href="#goal">0. この資料について</a>
+  <a class="sub" href="#setup">事前準備</a>
+  <a href="#arch">1. 全体像（アーキテクチャ）</a>
+  <a href="#theme">2. 題材と共通の流れ</a>
+  <a class="sub" href="#cards">題材カード</a>
+  <a href="#steps">3. 作業の流れ</a>
+  <a class="sub" href="#s1">[1] 要件の壁打ち</a>
+  <a class="sub" href="#s2">[2] 画面をデザイン</a>
+  <a class="sub" href="#s3">[3] フロント実装</a>
+  <a class="sub" href="#s4">[4] バックエンドと結合</a>
+  <a class="sub" href="#s5">[5] 確認とレビュー</a>
+  <a class="sub" href="#s6">[6] 公開（任意）</a>
+  <a href="#git">4. Git の扱い</a>
+  <a href="#tips">5. 困ったとき</a>
+</nav>
+
+<div class="wrap"><article>
+
+<h1>Webツール開発ワークショップ</h1>
+<p>Claude Design と Claude Code を使って、社内向けの小さな Web ツールを<strong>画面 → フロント → バックエンド</strong>まで一通り作ります。</p>
+
+<h2 id="goal">0. この資料について</h2>
+<ul>
+  <li><strong>説明</strong>：約1時間（この資料をざっと読む）</li>
+  <li><strong>作業</strong>：約3〜4時間（班で1つのツールを作る）</li>
+  <li><strong>前提</strong>：Claude Code の基本操作は Day1 で説明済み。必要な準備は下の「事前準備」を見てください。</li>
+</ul>
+<p class="key">この資料は<strong>作業中に横に置いて使う</strong>ものです。手順ごとにコピーして使えるプロンプトを置いてあります。<code>&lt; &gt;</code> の部分を自分の題材に書き換えて使ってください。</p>
+<p>黒い枠の上のラベルで、どこで使うものかを区別しています。</p>
+<ul class="legend">
+  <li><span class="blk-label design">Claude Design に送る</span><span class="blk-label prompt">Claude Code に送る</span>：チャット欄に貼り付けて送るプロンプト</li>
+  <li><span class="blk-label term">ターミナルで実行</span>：ターミナルに1行ずつ打つコマンド。Claude には送らない</li>
+  <li><span class="blk-label file">ファイルに書く</span>：その内容のファイルを作る</li>
+  <li><span class="blk-label ref">参考（実行しない）</span>：説明のための図や例</li>
+</ul>
+
+<h3 class="done">✅ ゴール（ここまでできたら完成）</h3>
+<ol>
+  <li>メールアドレスでログインできる</li>
+  <li>データを登録できる</li>
+  <li>登録したデータが一覧に出る。<strong>ページを再読み込みしても消えない</strong>（DB に保存されている）</li>
+  <li>題材ごとの<strong>固有ロジック</strong>が動き、ルール違反の操作は<strong>API 側でも</strong>弾かれる</li>
+</ol>
+
+<h3 id="setup">事前準備</h3>
+<ul>
+  <li><strong>アカウント</strong>：Claude（Pro 以上）、GitHub、Cloudflare</li>
+  <li><strong>ツール</strong>：Claude Code、Node.js 24 以上、git、wrangler（<code>npm install -g wrangler</code>）</li>
+</ul>
+<p>リポジトリ直下（いちばん上のフォルダ）に、次の2つのファイルを作ります。置き場所は次のとおりです。</p>
+<div class="blk-label ref">参考（実行しない）</div>
+<pre><code>リポジトリ直下/
+├── .claude/              ← フォルダを作る
+│   └── settings.json     ← ① このフォルダの中に作る
+└── .npmrc                ← ② リポジトリ直下に作る</code></pre>
+<p>中身は、下の枠をファイルごとにそのままコピーして貼ってください。</p>
+
+<p><strong>① <code>.claude/settings.json</code></strong>：秘密情報（パスワードなど）を Claude Code に読ませないための設定</p>
+<div class="blk-label file">ファイルに書く：.claude/settings.json</div>
+<pre><code>{
+  "permissions": {
+    "deny": [
+      "Read(./**/.dev.vars)",
+      "Read(./**/.env)",
+      "Read(./**/.env.*)",
+      "Read(./secrets/**)"
+    ]
+  }
+}</code></pre>
+<details class="spec"><summary>この設定の意味を見る</summary>
+<ul>
+  <li><code>permissions.deny</code>：Claude Code に<strong>させない操作</strong>の一覧です。ここに書いた操作は、Claude Code が頼まれても実行しません。</li>
+  <li><code>Read(./**/.dev.vars)</code>：どのフォルダにある <code>.dev.vars</code> も読ませない。<code>**</code> は「すべてのフォルダ」という意味です。<code>.dev.vars</code> は Cloudflare Workers で、手元で動かすときのパスワードや API キーを書くファイルです。</li>
+  <li><code>Read(./**/.env)</code>、<code>Read(./**/.env.*)</code>：<code>.env</code> や <code>.env.local</code> なども読ませない。秘密情報を書く定番のファイルです。</li>
+  <li><code>Read(./secrets/**)</code>：<code>secrets</code> フォルダの中身はすべて読ませない。</li>
+</ul>
+<p>Claude Code が読んだ内容は、会話の一部として AI に送られます。秘密情報を誤って読ませないよう、最初に止めておきます。</p>
+</details>
+
+<p><strong>② <code>.npmrc</code></strong>：公開されたばかりの怪しいパッケージを入れないための設定</p>
+<div class="blk-label file">ファイルに書く：.npmrc</div>
+<pre><code>min-release-age=7
+audit=true</code></pre>
+<details class="spec"><summary>2つの設定の意味を見る</summary>
+<ul>
+  <li><code>min-release-age=7</code>：公開されてから7日たっていないバージョンは、<code>npm install</code> で入れない。乗っ取られたパッケージや、有名なパッケージに似せた偽物は、公開されてすぐに見つかって消されることが多いので、数日待つだけで避けやすくなります。</li>
+  <li><code>audit=true</code>：<code>npm install</code> のたびに、入れたパッケージに知られた脆弱性がないかを自動でチェックする。</li>
+</ul>
+</details>
+<p class="note">名前が <code>.</code>（ドット）で始まるファイルやフォルダは、Mac の Finder では隠れていて見えません。VS Code などのエディタで作るか、Claude Code に「この内容で <code>.npmrc</code> を作って」と頼んでも構いません。</p>
+
+<h2 id="arch">1. 全体像（アーキテクチャ）</h2>
+<p>フロントと API を<strong>1つの Cloudflare Worker</strong>から配信します。そのためフロントは <code>/api/...</code> を相対パスで呼ぶだけで済みます。</p>
+
+<svg class="arch" viewBox="0 0 860 250" role="img" aria-label="ブラウザから Cloudflare Worker（フロントの静的ファイルと Hono の API）を経由して D1 につながる構成図">
+  <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#6b6453"/></marker></defs>
+  <g font-family="Hiragino Kaku Gothic ProN, Yu Gothic, sans-serif" font-size="14" fill="#2d2a24">
+    <rect x="10" y="80" width="150" height="80" rx="10" fill="#fff" stroke="#c8a96a" stroke-width="2"/>
+    <text x="85" y="115" text-anchor="middle" font-weight="700">ブラウザ</text>
+    <text x="85" y="138" text-anchor="middle" font-size="12" fill="#6b6453">React の画面</text>
+
+    <rect x="220" y="20" width="420" height="210" rx="12" fill="#f0fafa" stroke="#0d9488" stroke-width="2"/>
+    <text x="430" y="46" text-anchor="middle" font-weight="700" fill="#0f766e">Cloudflare Worker（1つ）</text>
+    <rect x="245" y="65" width="175" height="140" rx="8" fill="#fff" stroke="#b5e3de"/>
+    <text x="332" y="98" text-anchor="middle" font-weight="700">画面ファイル</text>
+    <text x="332" y="122" text-anchor="middle" font-size="12" fill="#6b6453">frontend/dist</text>
+    <text x="332" y="146" text-anchor="middle" font-size="12" fill="#6b6453">Vite + React + TS</text>
+    <text x="332" y="168" text-anchor="middle" font-size="12" fill="#6b6453">Tailwind + shadcn/ui</text>
+    <rect x="440" y="65" width="175" height="140" rx="8" fill="#fff" stroke="#b5e3de"/>
+    <text x="527" y="98" text-anchor="middle" font-weight="700">API /api/...</text>
+    <text x="527" y="122" text-anchor="middle" font-size="12" fill="#6b6453">backend/</text>
+    <text x="527" y="146" text-anchor="middle" font-size="12" fill="#6b6453">Hono + TypeScript</text>
+    <text x="527" y="168" text-anchor="middle" font-size="12" fill="#6b6453">固有ロジックの判定</text>
+
+    <rect x="700" y="80" width="150" height="80" rx="10" fill="#fff" stroke="#c8a96a" stroke-width="2"/>
+    <text x="775" y="115" text-anchor="middle" font-weight="700">D1</text>
+    <text x="775" y="138" text-anchor="middle" font-size="12" fill="#6b6453">SQLite のDB</text>
+
+    <line x1="160" y1="120" x2="240" y2="120" stroke="#6b6453" stroke-width="2" marker-end="url(#ar)"/>
+    <line x1="615" y1="135" x2="695" y2="120" stroke="#6b6453" stroke-width="2" marker-end="url(#ar)"/>
+  </g>
+</svg>
+
+<div class="table-wrap"><table>
+<thead><tr><th>役割</th><th>技術</th></tr></thead>
+<tbody>
+<tr><td>デザイン</td><td>Claude Design（claude.ai/design）</td></tr>
+<tr><td>実装・レビュー</td><td>Claude Code</td></tr>
+<tr><td>フロント</td><td>Vite + React + TypeScript、React Router、Tailwind CSS v4 + shadcn/ui</td></tr>
+<tr><td>バックエンド</td><td>Hono（TypeScript）on Cloudflare Workers</td></tr>
+<tr><td>DB</td><td>Cloudflare D1（SQLite）。マイグレーションは <code>backend/migrations/</code></td></tr>
+<tr><td>CLI</td><td>wrangler、npm、git</td></tr>
+</tbody></table></div>
+
+<p>完成したときのフォルダ構成は次のとおりです。</p>
+<div class="blk-label ref">参考（実行しない）</div>
+<pre><code>repo-root/
+├── spec.md        # [1] 壁打ちで決めた要件
+├── design.zip     # [2] Claude Design から書き出したもの
+├── frontend/      # [3] 画面（React）
+└── backend/       # [4] API（Hono）+ D1 のマイグレーション
+    └── wrangler.jsonc   # frontend/dist もここから配信する</code></pre>
+
+<h2 id="theme">2. 題材と共通の流れ</h2>
+<p>題材は次の7つから班で1つ選びます。どの題材も、次の<strong>共通の流れ</strong>で作ります。</p>
+<div class="flow"><span>① ログイン</span><i>→</i><span>② データを登録</span><i>→</i><span>③ 一覧で見る</span><i>→</i><span class="own">④ 固有ロジック</span></div>
+<p>①〜③はどの題材でもほぼ同じです。<strong>題材ごとの違いは ④ だけ</strong>なので、ここをどう作るかが腕の見せどころです。</p>
+<p class="note">ログインは<strong>メールアドレスを入力するだけの簡易版</strong>です。パスワードはありません。API はリクエストヘッダ <code>x-user-email</code> のメールアドレスをそのまま本人とみなします。</p>
+
+<h3 id="cards">題材カード</h3>
+<p>各題材には、社内の誰かからの<strong>依頼</strong>が来ている設定です。依頼内容と条件を読んで、<strong>困りごとを解決するには何が必要か</strong>を班で考えてください。条件はすべて満たす必要があります。それ以外の機能は自由です。</p>
+<details class="card">
+<summary>備品管理システム</summary>
+<dl>
+<dt>依頼者</dt><dd>総務部</dd>
+<dt>依頼内容</dt><dd class="req">現在は、プロジェクターや貸出用 PC、ケーブル類を棚に置き、使う人が紙の貸出ノートに名前を書いて持ち出しています。記入漏れが多く、「あのプロジェクター、誰が持ってる?」と探し回ったり、返ってこないまま行方不明になったりしています。誰が何を借りているかを、いつでも分かるようにしたいです。</dd>
+<dt>依頼者からの条件（必ず満たす）</dt><dd><ul><li>1つの備品を、同時に2人に貸し出すことは絶対にないようにしてほしい</li><li>誰が借りているかは必ず分かるようにしてほしい</li><li>総務を通さず、社員が自分で借りて返せるようにしたい</li></ul></dd>
+</dl>
+<details class="hint"><summary>ヒント：機能の例（詰まったら開く）</summary><div class="chips"><span>備品の登録（カテゴリ・保管場所）</span><span>貸出・返却</span><span>貸出状況の一覧</span><span>自分が借りている物の一覧</span><span>名前・カテゴリで検索</span><span>返却期限の超過表示</span><span>先の日付での貸出予約</span></div></details>
+</details>
+<details class="card">
+<summary>面談日程調整</summary>
+<dl>
+<dt>依頼者</dt><dd>人事部</dd>
+<dt>依頼内容</dt><dd class="req">現在は、新入社員とメンターの面談日程を、チャットで「この日はどうですか?」とやり取りして決めています。候補日を出し合うだけで何往復もかかり、同じ時間に2人と約束してしまったこともありました。面談の日程がすぐに決まるようにしたいです。</dd>
+<dt>依頼者からの条件（必ず満たす）</dt><dd><ul><li>メンターが空いている時間を出し、新入社員がそこから選ぶ形にしてほしい</li><li>1つの時間に2人の面談が入らないようにしてほしい</li><li>自分の面談予定をすぐ確認できるようにしたい</li></ul></dd>
+</dl>
+<details class="hint"><summary>ヒント：機能の例（詰まったら開く）</summary><div class="chips"><span>候補枠の登録</span><span>枠を選んで予約</span><span>予約のキャンセル・変更</span><span>自分の予定一覧</span><span>対面／オンラインの区分</span><span>前日のリマインド通知</span><span>面談メモ</span></div></details>
+</details>
+<details class="card">
+<summary>会議室予約</summary>
+<dl>
+<dt>依頼者</dt><dd>総務部</dd>
+<dt>依頼内容</dt><dd class="req">現在は、共有のスプレッドシートで会議室を予約しています。同時に編集されて予約が上書きされたり、空いていると思って行ったら別の会議をしていたりすることがよくあります。会議室の空きがひと目で分かり、確実に予約できるようにしたいです。</dd>
+<dt>依頼者からの条件（必ず満たす）</dt><dd><ul><li>同じ部屋・同じ時間帯のダブルブッキングだけは、絶対に起こさないでほしい</li><li>誰が予約したかは分かるようにしてほしい</li><li>予約した本人がキャンセルできるようにしたい</li></ul></dd>
+</dl>
+<details class="hint"><summary>ヒント：機能の例（詰まったら開く）</summary><div class="chips"><span>空き状況のタイムライン</span><span>予約・キャンセル</span><span>自分の予約一覧</span><span>人数・設備で検索</span><span>フロアマップから選択</span><span>定期予約（毎週など）</span><span>参加者の招待・通知</span></div></details>
+</details>
+<details class="card">
+<summary>日報システム</summary>
+<dl>
+<dt>依頼者</dt><dd>開発部のマネージャー</dd>
+<dt>依頼内容</dt><dd class="req">現在は、メンバーが毎日チャットに日報を投稿しています。ほかの会話に流れて後から探せないうえ、書き方が人によってバラバラで、誰が出していないのかも分かりません。日報を一か所にまとめて、チームの状況をつかみやすくしたいです。</dd>
+<dt>依頼者からの条件（必ず満たす）</dt><dd><ul><li>日報は1人1日1件にしてほしい</li><li>他人の日報は書き換えられないようにしてほしい</li><li>日付ごとに、チーム全員分の日報を見られるようにしたい</li></ul></dd>
+</dl>
+<details class="hint"><summary>ヒント：機能の例（詰まったら開く）</summary><div class="chips"><span>日報の投稿（やったこと・明日やること・困っていること）</span><span>チームの日報一覧</span><span>日付・人で絞り込み</span><span>自分の過去の日報</span><span>コメント・リアクション</span><span>未提出者の一覧</span><span>書き方のテンプレート</span></div></details>
+</details>
+<p class="tier">真面目に不真面目枠</p>
+<details class="card">
+<summary>置き菓子リクエスト</summary>
+<dl>
+<dt>依頼者</dt><dd>お菓子係</dd>
+<dt>依頼内容</dt><dd class="req">現在、オフィスの置き菓子はお菓子係が独断で買っています。「いつも同じお菓子ばかり」「あれを入れてほしい」という声が個別に届くものの、どれが人気なのか分かりません。みんなの希望を集めて、人気のお菓子から買えるようにしたいです。</dd>
+<dt>依頼者からの条件（必ず満たす）</dt><dd><ul><li>1人が同じお菓子に何回も投票できないようにしてほしい</li><li>人気の順番がひと目で分かるようにしてほしい</li><li>同じお菓子が何度もリクエストされて、票が割れないようにしたい</li></ul></dd>
+</dl>
+<details class="hint"><summary>ヒント：機能の例（詰まったら開く）</summary><div class="chips"><span>リクエストの登録（名前・値段・買える場所）</span><span>投票</span><span>人気順ランキング</span><span>購入済み・在庫切れの表示</span><span>コメント</span><span>月の予算の表示</span></div></details>
+</details>
+<details class="card">
+<summary>定時退社宣言ボード</summary>
+<dl>
+<dt>依頼者</dt><dd>人事部（働き方改革の担当）</dd>
+<dt>依頼内容</dt><dd class="req">現在、「定時で帰ろう」と呼びかけていますが、なかなか定着しません。帰りづらい雰囲気があり、本人も気づけば残業しています。朝のうちに帰る時刻を宣言して、守れたかどうかをみんなに見えるようにし、定時で帰る文化を作りたいです。</dd>
+<dt>依頼者からの条件（必ず満たす）</dt><dd><ul><li>宣言は1人1日1回、朝のうちにしてほしい（例: 12時まで）</li><li>宣言した時刻までに帰れたかを、自動で判定してほしい</li><li>誰が何時に帰ると宣言しているか、みんなが見られるようにしたい</li></ul></dd>
+</dl>
+<details class="hint"><summary>ヒント：機能の例（詰まったら開く）</summary><div class="chips"><span>朝の宣言（退社予定時刻・ひとこと）</span><span>退社報告</span><span>今日のボード</span><span>達成率・連続達成記録</span><span>応援スタンプ</span><span>チーム別の表示</span><span>週間ランキング</span></div></details>
+</details>
+<details class="card">
+<summary>飲食店ガチャ</summary>
+<dl>
+<dt>依頼者</dt><dd>ランチ好きの社員有志</dd>
+<dt>依頼内容</dt><dd class="req">現在、お昼になると「どこ行く?」で毎日迷っています。結局いつも同じ店に行ってしまい、周りにどんな店があるのかもよく知りません。みんなが知っている店を持ち寄って、迷ったら運任せで決められるようにしたいです。</dd>
+<dt>依頼者からの条件（必ず満たす）</dt><dd><ul><li>ジャンルや予算などの条件で絞ったうえで、ランダムに1軒選んでほしい</li><li>条件に合う店がないときは、そう分かるようにしてほしい</li><li>店はみんなが登録できるようにしたい</li></ul></dd>
+</dl>
+<details class="hint"><summary>ヒント：機能の例（詰まったら開く）</summary><div class="chips"><span>店の登録（ジャンル・予算・徒歩何分）</span><span>店の一覧と検索</span><span>ガチャ</span><span>行った記録・評価</span><span>お気に入り</span><span>定休日の表示</span><span>グループでガチャ</span></div></details>
+</details>
+
+<h2 id="steps">3. 作業の流れ</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>手順</th><th>やること</th><th>目安</th></tr></thead>
+<tbody>
+<tr><td>[1]</td><td>Claude Code と壁打ちして要件を決め、<code>spec.md</code> にまとめる</td><td>30分</td></tr>
+<tr><td>[2]</td><td><code>spec.md</code> をもとにツールの画面をデザインし、zip を書き出す</td><td>30分</td></tr>
+<tr><td>[3]</td><td>フロントを実装する（モックデータで動かす）</td><td>60分</td></tr>
+<tr><td>[4]</td><td>バックエンドを作り、フロントとつなぐ</td><td>75〜90分</td></tr>
+<tr><td>[5]</td><td>動作確認とレビュー</td><td>20分</td></tr>
+<tr><td>[6]</td><td>公開（任意）</td><td>20分</td></tr>
+</tbody></table></div>
+<div class="tbd">
+  <p><b>【未定】[2] 以降の進め方は、当日の環境に合わせて講師から指示します。</b></p>
+  <ul>
+    <li>Claude Design が使えない場合は、[2] を飛ばし、[3] で <code>spec.md</code> から直接画面を作ることがあります。</li>
+    <li>使う技術（[3] [4] のフロント・バックエンド）が変わることがあります。</li>
+    <li>どの場合も <code>spec.md</code> はそのまま使えます。技術の話を書かないのはそのためです。</li>
+  </ul>
+</div>
+
+<h3 id="s1">[1] 壁打ちで要件を決め、spec.md にまとめる</h3>
+<p>いきなり画面を作らず、まず<strong>何を作るか</strong>を班で決めます。Claude Code に<strong>聞き役</strong>をしてもらい、質問に答えながら機能やルールを炙り出します。決めるのは自分たちで、AI は質問と整理を手伝うだけです。</p>
+<ol>
+  <li>リポジトリ直下で Claude Code を開く。</li>
+  <li>次のプロンプトをコピーして Claude Code の入力欄に貼る。</li>
+  <li>自分の題材カードを開いて「カードの中身をコピー」を押し、プロンプトの <code>&lt; &gt;</code> の行と置き換えて送る。書き換えるのは<strong>この1か所だけ</strong>です。</li>
+  <li>質問に1つずつ、班で相談して答える。迷ったら題材カードの「ヒント：機能の例」も見てよい。</li>
+  <li>最後にまとめが出たら読み合わせ、直したいところを伝える。OK と答えると <code>spec.md</code> が書き出される。</li>
+  <li><code>spec.md</code> を commit する。</li>
+</ol>
+<div class="blk-label prompt">Claude Code に送る</div>
+<pre><code>社内向けの Web ツールを作る前に、要件を一緒に整理したい。
+あなたは聞き役になって、私たち（開発チーム）に質問しながら要件を固めて。
+
+題材カードは次のとおり。
+&lt;題材カードの「カードの中身をコピー」でコピーしたものを貼る&gt;
+
+進め方
+- 質問は1回に1つだけ。答えやすいように、選択肢や例を添えてよい
+- 次の順で聞く：困りごとの言い直し → 使う人と場面 → 機能 → ルールの細部 → 画面
+- 機能やルールを決めるのは私たち。あなたは提案してよいが、私たちが選ぶまで決定扱いにしない
+- 依頼者の条件は削らない。曖昧なところは「どう解釈するか」を私たちに聞く
+- どの題材にも共通の流れ（ログイン → データを登録 → 一覧で見る → 固有ロジック）が入っているか確かめる
+- ログインはメールアドレスを入力するだけの簡易ログインで決まっているので、聞かなくてよい
+- 機能は全部で3〜5個に収める。増えすぎたら優先順位を聞いて絞る
+- 全体で30分ほどで終わる量にする
+- 使う技術（言語・ライブラリ・DB）やデザインの細部（色・レイアウト）は聞かない
+
+全部決まったら、spec.md の形でまとめて見せて。
+私たちが OK と言ったら、リポジトリ直下に spec.md として書き出して。
+
+spec.md の形式
+# &lt;ツール名&gt;
+## 依頼者と困っていること
+## 使う人と場面
+## 機能
+（3〜5個。共通の流れのどれに当たるかも書く）
+## ルール
+（1つずつ「ルール／違反したときどうなるか／根拠（依頼者の条件・チームで決めた）」を書く）
+## 画面
+（画面ごとに、何が表示されて何ができるか。レイアウトは書かない）
+## やらないこと
+（今回は作らないと決めたもの）</code></pre>
+<p class="note">AI の提案をそのまま採用せず、<strong>「なぜそれが必要か」を班で言えるものだけ</strong>選んでください。言えないものは「やらないこと」に入れて構いません。</p>
+
+<details class="spec"><summary>完成例：壁打ちのあとにできる spec.md（題材にない「置き傘シェア」の場合）</summary>
+<p>壁打ちが終わると、次のようなファイルができます。Claude Code に送るものではありません。</p>
+<div class="blk-label ref">spec.md の完成例（送らない）</div>
+<pre><code># 置き傘シェア
+
+## 依頼者と困っていること
+総務部。受付の置き傘が誰に借りられたか分からず、返ってこないまま数が減っていく。
+
+## 使う人と場面
+急に雨が降ってきた帰りがけに、社員がスマホや PC で空いている傘を探して借りる。
+総務は週に1回、返っていない傘を確認する。
+
+## 機能
+1. メールアドレスでログインする（ログイン）
+2. 傘を登録する。総務だけが使う（データを登録）
+3. 傘ごとの貸出状況（貸出中／空き）を一覧で見る（一覧で見る）
+4. 傘を借りる・返す。自分が今借りている傘を表示する（固有ロジック）
+5. 3日以上返していない人を一覧で見る（固有ロジック）
+
+## ルール
+- 貸出中の傘は、別の人が借りられない／「貸出中です」と出して借りられない／依頼者の条件
+- 1人が同時に借りられるのは1本まで／「先に返してください」と出して借りられない／依頼者の条件
+- 誰が借りているかを一覧に表示する／（表示のルール）／依頼者の条件
+- 返せるのは借りている本人だけ／「本人しか返せません」と出して返せない／チームで決めた
+
+## 画面
+- ログイン：メールアドレスを入力してログインする
+- 傘の一覧：傘ごとの状態と借りている人。空いている傘には「借りる」ボタン
+- 自分の傘：今借りている傘と「返す」ボタン
+- 未返却の一覧（総務）：3日以上返していない人と傘
+
+## やらないこと
+- 返却期限のメール通知
+- 傘の予約</code></pre>
+</details>
+
+<h3 id="s2">[2] spec.md をもとにツールの画面をデザインする</h3>
+<p>作るのは<strong>ツールとして使う画面だけ</strong>です。サービスの紹介ページなどは作りません。</p>
+<ol>
+  <li>Claude Design（<a href="https://claude.ai/design" target="_blank" rel="noopener">https://claude.ai/design</a>）を開き、「UI mockups」を選ぶ。Design system は None にする。Claude Code と同じアカウントで、ブラウザからログインして使います。</li>
+  <li>次のプロンプトに <code>spec.md</code> の中身を貼って送る。</li>
+</ol>
+<div class="blk-label design">Claude Design に送る</div>
+<pre><code>社内向けの Web ツールの画面を作りたい。
+紹介ページは不要で、ツールとして使う画面だけを作って。
+要件は次の spec.md のとおり。spec.md にない機能は足さないこと。
+
+&lt;spec.md の中身をそのまま貼る&gt;</code></pre>
+
+<ol start="3">
+  <li>Claude Design が質問フォームを出してくるので、班で相談して答える。使う端末、利用者数、メインの画面、案をいくつ比べるか、などを聞かれます。</li>
+  <li>出てきた案を比べて1つ選び、チャットで直したいところを伝えて仕上げる。</li>
+  <li>デザインの途中で機能やルールを変えたら、Claude Code に「spec.md を次のように直して」と頼み、spec.md も合わせて直す。</li>
+  <li>Share → Export の「Claude Code」から <strong>Download .zip</strong> を選び、リポジトリ直下に <code>design.zip</code> として置く。</li>
+</ol>
+
+<h3 id="s3">[3] フロントを実装する（モックデータ）</h3>
+<div class="blk-label prompt">Claude Code に送る</div>
+<pre><code>frontend/ に Vite + React + TypeScript + Tailwind CSS v4 + shadcn/ui で SPA を作って。
+ルーティングは React Router を使って。
+
+design.zip を展開して、デザインにある画面と機能を実装して。
+デザインにない機能は足さないこと。
+ログインはメールアドレスだけを入力する簡易ログインにして、ログインするまで他の画面は見せないこと。
+この段階では API がないので、データはモックで表示して。</code></pre>
+<ol>
+  <li>ターミナルで <code>cd frontend &amp;&amp; npm run dev</code> を実行し、表示された URL をブラウザで開く。</li>
+  <li>①〜④を実際に操作し、気になる点を Claude Code に伝えて直す。</li>
+  <li>ここで一度 commit する。</li>
+</ol>
+
+<h3 id="s4">[4] バックエンドを作り、フロントとつなぐ</h3>
+<p>まず API を作ります。</p>
+<div class="blk-label prompt">Claude Code に送る</div>
+<pre><code>backend/ に Hono + Cloudflare Workers + TypeScript で API を作って。
+- D1（SQLite）を使い、wrangler.jsonc のバインディング名は DB にする
+- マイグレーションは backend/migrations/ に置く
+- frontend/ のコードを読んで、必要なテーブルと API（/api/...）を考えて実装する
+- ログインは簡易版でよい。リクエストヘッダ x-user-email のメールアドレスを本人とみなす
+- .gitignore で node_modules / dist / .dev.vars を除外する
+
+依頼者からの最初の条件は次のとおり。
+&lt;題材カードの「依頼者からの条件」をそのまま貼る&gt;
+
+この条件と frontend/ のコードを突き合わせて、API で守るルールを決めること。
+- データの保存・変更に関わるルールは、必ず API 側でもチェックし、
+  違反なら 4xx とエラーメッセージを返す
+- 条件とフロントが食い違うときは、フロントを優先する（デザインの途中で変えた内容のため）
+- 条件にあってフロントにないルール、フロントにあって条件にないルールも、API で守る
+
+実装が終わったら、次の2つを報告して。
+1. API で守るルールの一覧と、それぞれの根拠（条件・フロントのどちらから来たか）
+2. ルール違反になるリクエストを API に直接送り、弾かれることを確かめた結果</code></pre>
+<p>次に、フロントとつないで1つの Worker にまとめます。</p>
+<div class="blk-label prompt">Claude Code に送る</div>
+<pre><code>frontend/ のモックを backend/ の /api/... 呼び出しに置き換えて。
+あわせて、frontend/ のビルド結果を backend/ の Worker から配信するようにして。
+- backend/wrangler.jsonc の assets.directory を ../frontend/dist にする
+- assets.not_found_handling を "single-page-application" にする
+- backend/package.json に次の npm scripts を追加する
+  - build:front: npm --prefix ../frontend run build
+  - deploy: npm run build:front &amp;&amp; wrangler deploy</code></pre>
+<p>ローカルの DB にテーブルを作ってから起動します。<strong>Claude Code ではなく、自分のターミナルで</strong>リポジトリ直下から1行ずつ実行してください。</p>
+<div class="blk-label term">ターミナルで実行</div>
+<pre class="term"><code>cd backend
+npx wrangler d1 migrations apply DB --local
+npm run build:front &amp;&amp; npm run dev</code></pre>
+<p class="note"><code>DB</code> は、データベースの名前ではなく <code>wrangler.jsonc</code> のバインディング名です。プロンプトでバインディング名を <code>DB</code> に決めているので、そのまま実行できます。<code>npm run dev</code> は起動したまま動き続けます。止めるときは <code>Ctrl + C</code> を押します。</p>
+<p class="note">フロントのチェックは利用者の入力ミスを防ぐため、API のチェックはルールを確実に守るためのものです。<strong>フロントのチェックだけでは、API を直接呼ばれたら素通りしてしまいます。</strong>画面から操作する限りは正常に見えるので、抜けていても気づけません。そのため、API に直接リクエストを送る確認まで Claude Code にやらせています。</p>
+
+<h3 id="s5">[5] 動作確認とレビュー</h3>
+<p><code>npm run dev</code> で表示された URL を開き、次を確認します。</p>
+<ul>
+  <li>①〜④が画面から一通りできる</li>
+  <li>再読み込みしても、登録したデータが残っている</li>
+  <li>ルール違反の操作でエラーが出る。DevTools の Network タブで、<code>/api/...</code> が 4xx を返していることも見る</li>
+  <li>別のメールアドレスでログインし直すと、「自分のデータ」が切り替わる</li>
+</ul>
+<p>確認できたら Claude Code で <code>/code-review</code> と <code>/security-review</code> を実行します。指摘は自分たちで読んで、直すかどうかを判断してください（<code>--fix</code> は付けない）。直し終わったら commit します。</p>
+
+<h3 id="s6">[6] 公開する（任意）</h3>
+<ol>
+  <li>ターミナルで <code>wrangler login</code> のあと <code>wrangler whoami</code> を実行し、正しいアカウントか確認する。</li>
+  <li>Claude Code に「Cloudflare に D1 を作って、backend/wrangler.jsonc の database_id を設定して」と頼む。</li>
+  <li>ターミナルで <code>npx wrangler d1 migrations apply DB --remote</code> を実行し、本番 DB にテーブルを作る。</li>
+  <li><strong><code>backend/</code> で</strong> <code>npm run deploy</code> を実行する。<code>https://&lt;name&gt;.workers.dev</code> で開ければ完了。</li>
+</ol>
+<p class="warn"><code>frontend/</code> で deploy すると API がつながりません。必ず <code>backend/</code> から deploy してください。</p>
+
+<h2 id="git">4. Git の扱い</h2>
+<div class="tbd">
+  <p><b>【未定】班での Git の運用は当日講師から指示します。</b></p>
+  <ul>
+    <li>どの運用でも、<strong>手順が1つ終わるたびに commit</strong> してください。</li>
+    <li><code>.dev.vars</code> などの秘密情報は commit しないこと。</li>
+  </ul>
+</div>
+
+<h2 id="tips">5. 困ったとき</h2>
+<ul>
+  <li><strong>Claude Code がデザインにない機能まで作り始めた</strong> → 「デザインにない機能は作らないで」と止める。</li>
+  <li><strong>トップ以外の URL を直接開くと 404 になる</strong> → <code>assets.not_found_handling</code> が <code>"single-page-application"</code> になっているか確認する。</li>
+  <li><strong>API が <code>no such table</code> を返す</strong> → <code>--local</code>（本番なら <code>--remote</code>）でマイグレーションを適用し忘れていないか確認する。</li>
+  <li><strong>何がおかしいか分からない</strong> → エラーメッセージと「何をしたら、何が起きたか」をそのまま Claude Code に貼る。</li>
+  <li>時間が余ったら、新しい機能を考えて Claude Code に実装を頼んでみてください。</li>
+</ul>
+
+<p class="foot">Webツール開発ワークショップ</p>
+</article></div>
+<script>
+// 黒い枠の右上の「コピー」ボタンと、題材カードの「カードの中身をコピー」ボタン
+(function () {
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+    return ok ? Promise.resolve() : Promise.reject();
+  }
+  function copy(text) {
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text).catch(function () { return fallbackCopy(text); });
+    return fallbackCopy(text);
+  }
+  // ボタンを押したら getText() の結果をコピーし、結果を少しの間ボタンに表示する
+  function bindCopy(btn, label, getText) {
+    btn.addEventListener('click', function () {
+      copy(getText()).then(function () {
+        btn.textContent = 'コピーしました'; btn.classList.add('done');
+      }, function () {
+        btn.textContent = 'コピーできませんでした';
+      }).then(function () {
+        setTimeout(function () { btn.textContent = label; btn.classList.remove('done'); }, 1600);
+      });
+    });
+  }
+
+  document.querySelectorAll('pre').forEach(function (pre) {
+    var code = pre.querySelector('code') || pre;
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'copy-btn'; btn.textContent = 'コピー';
+    btn.setAttribute('aria-label', 'この枠の内容をコピー');
+    bindCopy(btn, 'コピー', function () { return code.innerText.replace(/\n$/, ''); });
+    pre.appendChild(btn);
+  });
+
+  // 題材カードを、壁打ちのプロンプトに貼る形の文字にする（機能の例のヒントは含めない）
+  function cardText(card) {
+    var lines = ['【題材】' + card.querySelector('summary').textContent.trim()];
+    card.querySelectorAll(':scope > dl > dt').forEach(function (dt) {
+      var label = dt.textContent.replace(/（.*?）/g, '').trim();
+      var dd = dt.nextElementSibling;
+      var items = dd.querySelectorAll('li');
+      if (items.length) {
+        lines.push('【' + label + '】');
+        items.forEach(function (li) { lines.push('- ' + li.textContent.trim()); });
+      } else {
+        lines.push('【' + label + '】' + dd.textContent.trim());
+      }
+    });
+    return lines.join('\n');
+  }
+  document.querySelectorAll('details.card').forEach(function (card) {
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'card-copy'; btn.textContent = 'カードの中身をコピー';
+    bindCopy(btn, 'カードの中身をコピー', function () { return cardText(card); });
+    card.querySelector(':scope > dl').after(btn);
+  });
+})();
+</script>
+</body></html>
