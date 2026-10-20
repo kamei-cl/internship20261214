@@ -716,6 +716,17 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
     <li><strong>別の班に使ってもらい</strong>、もらった意見で直す</li>
   </ol>
 </section>
+<section class="slide">
+  <h2>今日の進め方</h2>
+  <div class="chain"><span>説明を聞く</span><i>→</i><span class="hub">班で作る</span><i>→</i><span class="hub">別の班と使い合う</span><i>→</i><span>意見で直す</span></div>
+  <ul>
+    <li>最初に、この資料で全体の流れを説明する（今ここ）</li>
+    <li>あとは<strong>班ごとに、資料を見ながら自分たちのペースで</strong>進める</li>
+    <li>できたら公開して、<strong>別の班に使ってもらう</strong>。もらった意見で直す</li>
+    <li>分からないことは、まず Claude Code に、それでも困ったら講師に聞く</li>
+  </ul>
+</section>
+
 
 <section class="slide">
   <div class="kicker">作るものの全体像 1/4</div>
@@ -766,6 +777,17 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
   </ul>
   <p class="example">だから、公開した画面には<strong>ダミーのデータとダミーのメールアドレス</strong>（taro@example.com など）だけを使う</p>
 </section>
+<section class="slide">
+  <h2>AI に任せること、自分たちで決めること</h2>
+  <div class="cols">
+    <div class="box"><h3>AI（Claude）に任せる</h3>
+      <ul><li>質問して、要件を整理する</li><li>画面をデザインする</li><li>コードを書く・直す</li><li>コードを点検する</li></ul></div>
+    <div class="box"><h3>自分たちで決める</h3>
+      <ul><li><strong>何を作るか</strong></li><li>AI の提案のどれを採用するか</li><li>守るべきルール</li><li>できあがりで良いかの確認</li></ul></div>
+  </div>
+  <p style="margin-top:.8em">プログラミングに詳しくなくても大丈夫。<strong>「何を作りたいか」をはっきり伝える</strong>ことが、いちばん大事な仕事です</p>
+</section>
+
 
 <section class="slide">
   <h2>題材は7つから班で1つ</h2>
@@ -776,6 +798,32 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
   <p class="flow" style="margin-top:1em">共通の流れ：① ログイン → ② 登録 → ③ 一覧 → <strong>④ 固有ロジック</strong></p>
   <p>どの題材も①〜③はほぼ同じ。<strong>違いは④だけ</strong>なので、ここが腕の見せどころ</p>
 </section>
+<section class="slide">
+  <h2>題材カードの読み方</h2>
+  <p>どの題材も、<strong>社内の誰かから依頼が来ている</strong>という設定です</p>
+  <table class="compact"><tbody>
+    <tr><td>依頼者</td><td>誰からの依頼か（総務部、人事部、お菓子係 など）</td></tr>
+    <tr><td>依頼内容</td><td>今どう困っているか、どうしたいか</td></tr>
+    <tr><td>依頼者からの条件</td><td><strong>必ず満たすこと</strong>（3つ）。それ以外の機能は自由</td></tr>
+    <tr><td>ヒント</td><td>機能の例。詰まったときだけ開く</td></tr>
+  </tbody></table>
+  <p class="muted">「カードの中身をコピー」ボタンで、[1] のプロンプトにそのまま貼れます</p>
+</section>
+
+<section class="slide">
+  <h2>④ 固有ロジックは、たとえばこんなルール</h2>
+  <table class="compact"><tbody>
+    <tr><td>備品管理</td><td>1つの備品を、同時に2人に貸さない</td></tr>
+    <tr><td>面談日程調整</td><td>1つの時間に、2人の面談を入れない</td></tr>
+    <tr><td>会議室予約</td><td>同じ部屋・同じ時間帯のダブルブッキングを起こさない</td></tr>
+    <tr><td>日報システム</td><td>日報は1人1日1件まで</td></tr>
+    <tr><td>置き菓子リクエスト</td><td>1人が同じお菓子に何回も投票できない</td></tr>
+    <tr><td>定時退社宣言ボード</td><td>宣言は1人1日1回、朝のうちだけ</td></tr>
+    <tr><td>飲食店ガチャ</td><td>条件で絞ってから、ランダムに1軒選ぶ</td></tr>
+  </tbody></table>
+  <p class="muted">どれも依頼者の条件そのもの。ここをどう作るかが腕の見せどころ</p>
+</section>
+
 
 <section class="slide">
   <h2>作業の流れ</h2>
@@ -841,9 +889,45 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
   </ul>
   <p class="example">ルールの例（置き傘シェア）：貸出中の傘は、別の人が借りられない ／「貸出中です」と出して借りられない ／ 依頼者の条件</p>
 </section>
+<section class="slide">
+  <div class="kicker">[2] 画面をデザインする（30分）</div>
+  <h2>spec.md から、画面の見た目を作る</h2>
+  <ul>
+    <li><strong>Claude Design</strong> に spec.md を渡して、画面のデザインを作ってもらう</li>
+    <li>作るのは<strong>ツールとして使う画面だけ</strong>。紹介ページは作らない</li>
+    <li>質問フォームが出たら、班で相談して答える</li>
+    <li>出てきた案を<strong>比べて1つ選び</strong>、気になるところをチャットで直す</li>
+    <li>できたら zip で書き出し、<strong>design.zip</strong> としてリポジトリに置く</li>
+  </ul>
+</section>
 
 <section class="slide">
-  <h2>[4] ルールは API でも守る</h2>
+  <div class="kicker">[3] 画面を作る（60分）</div>
+  <h2>まずは「見た目だけ動く」画面を作る</h2>
+  <ul>
+    <li>design.zip を元に、Claude Code に画面を作ってもらう</li>
+    <li>この段階では、データは<strong>仮のデータ（モック）</strong>で表示する</li>
+    <li>データベースが無くても、<strong>画面の流れを先に確かめられる</strong>のがポイント</li>
+    <li>ブラウザで ①〜④ を操作し、気になるところを Claude Code に伝えて直す</li>
+    <li>できたら commit</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">[4] API を作ってつなぐ（75〜90分）</div>
+  <h2>仮のデータを、本物のデータに置き換える</h2>
+  <div class="chain"><span>API を作る</span><i>→</i><span>テーブルを作る</span><i>→</i><span>画面と API をつなぐ</span><i>→</i><span class="hub">本物のデータで動く</span></div>
+  <ul>
+    <li>講師が用意した<strong>雛形</strong>に、Claude Code が API を書き足す</li>
+    <li>データの入れ物（テーブル）も、Claude Code が考えて作る</li>
+    <li>つないだら、<strong>再読み込みしてもデータが残る</strong>ようになる</li>
+  </ul>
+</section>
+
+
+<section class="slide">
+  <div class="kicker">[4] API を作ってつなぐ（つづき）</div>
+  <h2>ルールは API でも守る</h2>
   <p class="big">画面のチェックだけでは、<br>API を直接呼ばれたら素通りしてしまう</p>
   <ul>
     <li>画面のチェック：利用者の入力ミスを防ぐため</li>
@@ -851,9 +935,34 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
     <li>ルール違反のリクエストを API に直接送り、<strong>弾かれることを確かめる</strong>ところまで Claude Code にやらせる</li>
   </ul>
 </section>
+<section class="slide">
+  <div class="kicker">[5] 班の中で確かめる（20分）</div>
+  <h2>動くか、ルールが守られているか</h2>
+  <ul>
+    <li>①〜④が、画面から一通りできる</li>
+    <li>再読み込みしても、登録したデータが残っている</li>
+    <li>ルール違反の操作で、ちゃんとエラーになる</li>
+    <li>別のメールアドレスでログインすると、「自分のデータ」が切り替わる</li>
+  </ul>
+  <p>最後に Claude Code にコードを<strong>点検</strong>してもらう。指摘を直すかどうかは<strong>自分たちで判断</strong>する</p>
+</section>
 
 <section class="slide">
-  <h2>[7] 別の班に使ってもらう</h2>
+  <div class="kicker">[6] 公開する（20分）</div>
+  <h2>インターネットから使えるようにする</h2>
+  <ul>
+    <li><strong>main に push すると、自動で公開</strong>される仕組みを、講師が用意している</li>
+    <li>公開されると、<strong>URL を開けば誰でも使える</strong>状態になる</li>
+    <li>スマートフォンでも開いて、本当に公開できたか確かめる</li>
+    <li>誰でも見られるので、<strong>ダミーのデータだけ</strong>を使う</li>
+  </ul>
+  <p class="muted">詳しい手順は資料の [6]</p>
+</section>
+
+
+<section class="slide">
+  <div class="kicker">[7] 別の班に使ってもらう（30分）</div>
+  <h2>班全員で、別の班のパソコンへ</h2>
   <div class="cols">
     <div class="box"><h3>回る前に</h3>ツールを開き、意見を書くファイル（feedback/review.md）をメモ帳で開いておく</div>
     <div class="box"><h3>回った先で</h3>依頼者になったつもりで使う。条件を破る操作も試し、ファイルに意見を書く</div>
@@ -864,6 +973,18 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
     <li>戻ったら [8] で、意見を Claude Code に読ませて直す</li>
   </ul>
 </section>
+<section class="slide">
+  <div class="kicker">[8] 意見を反映する（残り時間）</div>
+  <h2>もらった意見で、ツールを良くする</h2>
+  <div class="chain"><span>意見を読ませる</span><i>→</i><span>直し方の案（番号付き）</span><i>→</i><span class="hub">班で選ぶ</span><i>→</i><span>直す・push</span></div>
+  <ul>
+    <li>全部に対応しなくてよい。<strong>どれをやるかは班で決める</strong></li>
+    <li>ここでも spec.md を直してから実装する</li>
+    <li>意見が少ない・時間が余ったら、Claude Code に<strong>追加機能の案</strong>を出してもらう</li>
+    <li>直したら、意見をくれた班にもう一度見てもらおう</li>
+  </ul>
+</section>
+
 
 <section class="slide">
   <h2>作業中に守ること</h2>
