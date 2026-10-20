@@ -107,6 +107,7 @@ p.tier{margin:1.8em 0 .4em; font-size:.85rem; font-weight:700; color:#a3661b; le
 #toc a{display:block; padding:.28em .5em; border-radius:5px; text-decoration:none; color:var(--ink); font-size:.88rem;}
 #toc a:hover{background:var(--code-bg); color:var(--accent);}
 #toc a.sub{padding-left:1.4em; font-size:.84rem; color:var(--muted);}
+#toc a.cur{background:#e6fafa; color:var(--accent-deep); font-weight:700;}
 .foot{text-align:center; color:var(--muted); font-size:.8rem; margin-top:30px}
 @media(max-width:900px){
   #toc{display:none;}
@@ -125,15 +126,15 @@ p.tier{margin:1.8em 0 .4em; font-size:.85rem; font-weight:700; color:#a3661b; le
   <a href="#theme">2. 題材と共通の流れ</a>
   <a class="sub" href="#cards">題材カード</a>
   <a href="#steps">3. 作業の流れ</a>
+  <a class="sub" href="#before">作業を始める前に</a>
   <a class="sub" href="#s1">[1] 要件の壁打ち</a>
   <a class="sub" href="#s2">[2] 画面をデザイン</a>
   <a class="sub" href="#s3">[3] フロント実装</a>
   <a class="sub" href="#s4">[4] バックエンドと結合</a>
-  <a class="sub" href="#s5">[5] 確認とレビュー</a>
-  <a class="sub" href="#s6">[6] 公開（任意）</a>
-  <a class="sub" href="#extra">時間が余ったら</a>
-  <a href="#git">4. Git の扱い</a>
-  <a href="#tips">5. 困ったとき</a>
+  <a class="sub" href="#s5">[5] 班の中で確認</a>
+  <a class="sub" href="#s6">[6] 公開する</a>
+  <a class="sub" href="#review">[7] 別の班に使ってもらう</a>
+  <a class="sub" href="#extra">[8] 意見を反映する</a>
 </nav>
 
 <div class="wrap"><article>
@@ -152,7 +153,6 @@ p.tier{margin:1.8em 0 .4em; font-size:.85rem; font-weight:700; color:#a3661b; le
 <ul class="legend">
   <li><span class="blk-label design">Claude Design に送る</span><span class="blk-label prompt">Claude Code に送る</span>：チャット欄に貼り付けて送るプロンプト</li>
   <li><span class="blk-label term">ターミナルで実行</span>：ターミナルに1行ずつ打つコマンド。Claude には送らない</li>
-  <li><span class="blk-label file">ファイルに書く</span>：その内容のファイルを作る</li>
   <li><span class="blk-label ref">参考（実行しない）</span>：説明のための図や例</li>
 </ul>
 
@@ -162,12 +162,13 @@ p.tier{margin:1.8em 0 .4em; font-size:.85rem; font-weight:700; color:#a3661b; le
   <li>データを登録できる</li>
   <li>登録したデータが一覧に出る。<strong>ページを再読み込みしても消えない</strong>（DB に保存されている）</li>
   <li>題材ごとの<strong>固有ロジック</strong>が動き、ルール違反の操作は<strong>API 側でも</strong>弾かれる</li>
+  <li>公開したツールを<strong>別の班に使ってもらい</strong>、もらった意見をもとに直す</li>
 </ol>
 
 <h3 id="setup">事前準備</h3>
 <ul>
-  <li><strong>アカウント</strong>：Claude（Pro 以上）、GitHub、Cloudflare</li>
-  <li><strong>ツール</strong>：Claude Code、Node.js 24 以上、git、wrangler（<code>npm install -g wrangler</code>）</li>
+  <li><strong>アカウント</strong>：Claude（Pro 以上）、GitHub（講師の Organization への招待を受けておく）。Cloudflare（無料）は<strong>班の代表者1人だけ</strong>必要です（[6] で使います）</li>
+  <li><strong>ツール</strong>：Claude Code、Node.js 24 以上、git。Cloudflare の CLI（wrangler）はリポジトリの <code>backend/</code> に入っているので、別にインストールしなくてよい</li>
 </ul>
 <h4 id="repo">リポジトリのフォルダに移動する</h4>
 <p>作業に使うリポジトリは、講師があらかじめパソコンに用意しています。</p>
@@ -182,24 +183,34 @@ p.tier{margin:1.8em 0 .4em; font-size:.85rem; font-weight:700; color:#a3661b; le
 <pre class="term"><code>cd &lt;フォルダの場所&gt;</code></pre>
 <p class="note">ターミナルを開き直したときも、最初にこのコマンドで移動してください。このフォルダが、以降の説明でいう<strong>リポジトリ直下</strong>です。</p>
 
-<h4 id="files">最初に置く2つのファイル</h4>
-<p>リポジトリ直下（いちばん上のフォルダ）に、次の2つのファイルを作ります。置き場所は次のとおりです。</p>
+<h4 id="files">最初から入っているファイル</h4>
+<p>リポジトリには、講師が次のファイルを入れてあります。<strong>自分で作る必要はありません。</strong>中身と意味だけ確認してください。</p>
 <div class="blk-label ref">参考（実行しない）</div>
 <pre><code>リポジトリ直下/
-├── .claude/              ← フォルダを作る
-│   └── settings.json     ← ① このフォルダの中に作る
-└── .npmrc                ← ② リポジトリ直下に作る</code></pre>
-<p>中身は、下の枠をファイルごとにそのままコピーして貼ってください。</p>
+├── .github/workflows/deploy.yml  ← 自動で公開する仕組み（[6]）
+├── .claude/settings.json         ← ① Claude Code にさせない操作の設定
+├── .npmrc                        ← ② 怪しいパッケージを入れない設定
+├── .gitignore                    ← commit しないファイルの一覧
+├── CLAUDE.md                     ← Claude Code への注意書き（触らないファイルとその理由）
+└── backend/                      ← バックエンドの雛形（[4] でここに API を書く）
+    ├── wrangler.jsonc            ← 公開先と DB の設定
+    ├── package.json
+    ├── src/index.ts
+    └── migrations/               ← 空。[4] でテーブル定義を足す</code></pre>
+<p class="warn"><code>.github/</code>、<code>.claude/</code>、<code>backend/wrangler.jsonc</code>、<code>backend/package.json</code> の scripts は講師が管理しています。<strong>変更しないでください。</strong>変更すると公開が壊れます。Claude Code にも編集させないよう、①で設定してあります。</p>
 
-<p><strong>① <code>.claude/settings.json</code></strong>：秘密情報（パスワードなど）を Claude Code に読ませないための設定</p>
-<div class="blk-label file">ファイルに書く：.claude/settings.json</div>
+<p><strong>① <code>.claude/settings.json</code></strong>：秘密情報を Claude Code に読ませない設定と、講師のファイルを編集させない設定</p>
+<div class="blk-label ref">参考（実行しない）：.claude/settings.json</div>
 <pre><code>{
   "permissions": {
     "deny": [
       "Read(./**/.dev.vars)",
       "Read(./**/.env)",
       "Read(./**/.env.*)",
-      "Read(./secrets/**)"
+      "Read(./secrets/**)",
+      "Edit(./.github/**)",
+      "Edit(./.claude/**)",
+      "Edit(./backend/wrangler.jsonc)"
     ]
   }
 }</code></pre>
@@ -209,12 +220,13 @@ p.tier{margin:1.8em 0 .4em; font-size:.85rem; font-weight:700; color:#a3661b; le
   <li><code>Read(./**/.dev.vars)</code>：どのフォルダにある <code>.dev.vars</code> も読ませない。<code>**</code> は「すべてのフォルダ」という意味です。<code>.dev.vars</code> は Cloudflare Workers で、手元で動かすときのパスワードや API キーを書くファイルです。</li>
   <li><code>Read(./**/.env)</code>、<code>Read(./**/.env.*)</code>：<code>.env</code> や <code>.env.local</code> なども読ませない。秘密情報を書く定番のファイルです。</li>
   <li><code>Read(./secrets/**)</code>：<code>secrets</code> フォルダの中身はすべて読ませない。</li>
+  <li><code>Edit(...)</code> の3行：自動で公開する仕組み、この設定ファイル自体、公開先の設定を、Claude Code に書き換えさせない。</li>
 </ul>
 <p>Claude Code が読んだ内容は、会話の一部として AI に送られます。秘密情報を誤って読ませないよう、最初に止めておきます。</p>
 </details>
 
 <p><strong>② <code>.npmrc</code></strong>：公開されたばかりの怪しいパッケージを入れないための設定</p>
-<div class="blk-label file">ファイルに書く：.npmrc</div>
+<div class="blk-label ref">参考（実行しない）：.npmrc</div>
 <pre><code>min-release-age=7
 audit=true</code></pre>
 <details class="spec"><summary>2つの設定の意味を見る</summary>
@@ -223,10 +235,10 @@ audit=true</code></pre>
   <li><code>audit=true</code>：<code>npm install</code> のたびに、入れたパッケージに知られた脆弱性がないかを自動でチェックする。</li>
 </ul>
 </details>
-<p class="note">名前が <code>.</code>（ドット）で始まるファイルやフォルダは、Mac の Finder では隠れていて見えません。VS Code などのエディタで作るか、Claude Code に「この内容で <code>.npmrc</code> を作って」と頼んでも構いません。</p>
+<p class="note">ファイルの中身は、Claude Code に「<code>.claude/settings.json</code> を見せて」のように頼むと確認できます。</p>
 
 <h2 id="arch">1. 全体像（アーキテクチャ）</h2>
-<p>フロントと API を<strong>1つの Cloudflare Worker</strong>から配信します。そのためフロントは <code>/api/...</code> を相対パスで呼ぶだけで済みます。</p>
+<p>フロントと API を<strong>1つの Cloudflare Worker</strong>から配信します。そのためフロントは <code>/api/...</code> を相対パスで呼ぶだけで済みます。公開は、main に push すると GitHub Actions が自動で行います（[6]）。</p>
 
 <svg class="arch" viewBox="0 0 860 250" role="img" aria-label="ブラウザから Cloudflare Worker（フロントの静的ファイルと Hono の API）を経由して D1 につながる構成図">
   <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#6b6453"/></marker></defs>
@@ -271,11 +283,13 @@ audit=true</code></pre>
 <p>完成したときのフォルダ構成は次のとおりです。</p>
 <div class="blk-label ref">参考（実行しない）</div>
 <pre><code>repo-root/
+├── .github/       # 講師：自動で公開する仕組み
+├── CLAUDE.md      # 講師：Claude Code への注意書き
 ├── spec.md        # [1] 壁打ちで決めた要件
 ├── design.zip     # [2] Claude Design から書き出したもの
 ├── frontend/      # [3] 画面（React）
-└── backend/       # [4] API（Hono）+ D1 のマイグレーション
-    └── wrangler.jsonc   # frontend/dist もここから配信する</code></pre>
+└── backend/       # [4] API（Hono）+ D1 のマイグレーション。雛形は講師が用意
+    └── wrangler.jsonc   # 講師：frontend/dist もここから配信する設定</code></pre>
 
 <h2 id="theme">2. 題材と共通の流れ</h2>
 <p>題材は次の7つから班で1つ選びます。どの題材も、次の<strong>共通の流れ</strong>で作ります。</p>
@@ -354,12 +368,14 @@ audit=true</code></pre>
 <div class="table-wrap"><table>
 <thead><tr><th>手順</th><th>やること</th><th>目安</th></tr></thead>
 <tbody>
-<tr><td>[1]</td><td>Claude Code と壁打ちして要件を決め、<code>spec.md</code> にまとめる</td><td>30分</td></tr>
-<tr><td>[2]</td><td><code>spec.md</code> をもとにツールの画面をデザインし、zip を書き出す</td><td>30分</td></tr>
-<tr><td>[3]</td><td>フロントを実装する（モックデータで動かす）</td><td>60分</td></tr>
-<tr><td>[4]</td><td>バックエンドを作り、フロントとつなぐ</td><td>75〜90分</td></tr>
-<tr><td>[5]</td><td>動作確認とレビュー</td><td>20分</td></tr>
-<tr><td>[6]</td><td>公開（任意）</td><td>20分</td></tr>
+<tr><td><a href="#s1">[1]</a></td><td>Claude Code と壁打ちして要件を決め、<code>spec.md</code> にまとめる</td><td>30分</td></tr>
+<tr><td><a href="#s2">[2]</a></td><td><code>spec.md</code> をもとにツールの画面をデザインし、zip を書き出す</td><td>30分</td></tr>
+<tr><td><a href="#s3">[3]</a></td><td>フロントを実装する（モックデータで動かす）</td><td>60分</td></tr>
+<tr><td><a href="#s4">[4]</a></td><td>バックエンドを作り、フロントとつなぐ</td><td>75〜90分</td></tr>
+<tr><td><a href="#s5">[5]</a></td><td>班の中で動作確認とコードレビュー</td><td>20分</td></tr>
+<tr><td><a href="#s6">[6]</a></td><td>公開する（代表者が1回だけ準備する）</td><td>20分</td></tr>
+<tr><td><a href="#review">[7]</a></td><td><strong>別の班に使ってもらい、意見をもらう</strong>（相互レビュー）</td><td>30分</td></tr>
+<tr><td><a href="#extra">[8]</a></td><td>もらった意見を反映する（修正・機能追加）</td><td>残り時間</td></tr>
 </tbody></table></div>
 <div class="tbd">
   <p><b>【未定】[2] 以降の進め方は、当日の環境に合わせて講師から指示します。</b></p>
@@ -369,6 +385,15 @@ audit=true</code></pre>
     <li>どの場合も <code>spec.md</code> はそのまま使えます。技術の話を書かないのはそのためです。</li>
   </ul>
 </div>
+
+<h3 id="before">作業を始める前に</h3>
+<ul>
+  <li><strong>こまめに commit する</strong>：手順が1つ終わるたびに commit してください。途中で壊れても、うまく動いていたところまで戻れます。リポジトリは講師が用意したものを使い、フォークはしません。ブランチで作業して、main にマージします。</li>
+  <li><strong>main に入れたものは公開される</strong>：[6] の準備が済んだあとは、main に push するたびに自動で公開されます。手元から deploy はしません。</li>
+  <li><strong>講師のファイルを変えない</strong>：<code>.github/</code>、<code>.claude/</code>、<code>backend/wrangler.jsonc</code>、<code>backend/package.json</code> の scripts は変更しないでください（<a href="#files">最初から入っているファイル</a>）。</li>
+  <li><strong>秘密の値を渡さない</strong>：パスワードや API キーなどの秘密の値は、commit しないでください。Claude Code のチャットにも貼らないでください。秘密の値は <code>backend/.dev.vars</code> に書き、Claude Code には名前だけを伝えます（事前準備の設定で、Claude Code は <code>.dev.vars</code> を読めないようにしてあります）。</li>
+  <li><strong>困ったら Claude Code に相談する</strong>：エラーが出たり、思ったとおりに動かなかったりしたら、エラーメッセージと「何をしたら、何が起きたか」をそのまま Claude Code に貼って、相談しながら進めてください。公開に失敗したときは、GitHub の Actions タブで失敗した実行を開き、ログのエラーの部分を貼ります。</li>
+</ul>
 
 <h3 id="s1">[1] 壁打ちで要件を決め、spec.md にまとめる</h3>
 <p>いきなり画面を作らず、まず<strong>何を作るか</strong>を班で決めます。Claude Code に<strong>聞き役</strong>をしてもらい、質問に答えながら機能やルールを炙り出します。決めるのは自分たちで、AI は質問と整理を手伝うだけです。</p>
@@ -489,12 +514,11 @@ design.zip を展開して、デザインにある画面と機能を実装して
 <h3 id="s4">[4] バックエンドを作り、フロントとつなぐ</h3>
 <p>まず API を作ります。</p>
 <div class="blk-label prompt">Claude Code に送る</div>
-<pre><code>backend/ に Hono + Cloudflare Workers + TypeScript で API を作って。
-- D1（SQLite）を使い、wrangler.jsonc のバインディング名は DB にする
-- マイグレーションは backend/migrations/ に置く
+<pre><code>backend/ の雛形（Hono + Cloudflare Workers + TypeScript）に API を実装して。
 - frontend/ のコードを読んで、必要なテーブルと API（/api/...）を考えて実装する
+- テーブル定義は backend/migrations/ に SQL で足す。DB は雛形で設定済みの D1（バインディング名 DB）を使う
 - ログインは簡易版でよい。リクエストヘッダ x-user-email のメールアドレスを本人とみなす
-- .gitignore で node_modules / dist / .dev.vars を除外する
+- backend/wrangler.jsonc、backend/package.json の scripts、.github/ は変更しない
 
 依頼者からの最初の条件は次のとおり。
 &lt;題材カードの「依頼者からの条件」をそのまま貼る&gt;
@@ -508,24 +532,18 @@ design.zip を展開して、デザインにある画面と機能を実装して
 実装が終わったら、次の2つを報告して。
 1. API で守るルールの一覧と、それぞれの根拠（条件・フロントのどちらから来たか）
 2. ルール違反になるリクエストを API に直接送り、弾かれることを確かめた結果</code></pre>
-<p>次に、フロントとつないで1つの Worker にまとめます。</p>
+<p>次に、フロントと API をつなぎます。フロントのビルド結果を Worker から配信する設定は、雛形に入っています。</p>
 <div class="blk-label prompt">Claude Code に送る</div>
-<pre><code>frontend/ のモックを backend/ の /api/... 呼び出しに置き換えて。
-あわせて、frontend/ のビルド結果を backend/ の Worker から配信するようにして。
-- backend/wrangler.jsonc の assets.directory を ../frontend/dist にする
-- assets.not_found_handling を "single-page-application" にする
-- backend/package.json に次の npm scripts を追加する
-  - build:front: npm --prefix ../frontend run build
-  - deploy: npm run build:front &amp;&amp; wrangler deploy</code></pre>
+<pre><code>frontend/ のモックを backend/ の /api/... 呼び出しに置き換えて。</code></pre>
 <p>ローカルの DB にテーブルを作ってから起動します。<strong>Claude Code ではなく、自分のターミナルで</strong>リポジトリ直下から1行ずつ実行してください。</p>
 <div class="blk-label term">ターミナルで実行</div>
 <pre class="term"><code>cd backend
 npx wrangler d1 migrations apply DB --local
 npm run build:front &amp;&amp; npm run dev</code></pre>
-<p class="note"><code>DB</code> は、データベースの名前ではなく <code>wrangler.jsonc</code> のバインディング名です。プロンプトでバインディング名を <code>DB</code> に決めているので、そのまま実行できます。<code>npm run dev</code> は起動したまま動き続けます。止めるときは <code>Ctrl + C</code> を押します。</p>
+<p class="note"><code>DB</code> は、データベースの名前ではなく <code>wrangler.jsonc</code> のバインディング名です。雛形でバインディング名を <code>DB</code> にしてあるので、そのまま実行できます。<code>npm run dev</code> は起動したまま動き続けます。止めるときは <code>Ctrl + C</code> を押します。</p>
 <p class="note">フロントのチェックは利用者の入力ミスを防ぐため、API のチェックはルールを確実に守るためのものです。<strong>フロントのチェックだけでは、API を直接呼ばれたら素通りしてしまいます。</strong>画面から操作する限りは正常に見えるので、抜けていても気づけません。そのため、API に直接リクエストを送る確認まで Claude Code にやらせています。</p>
 
-<h3 id="s5">[5] 動作確認とレビュー</h3>
+<h3 id="s5">[5] 班の中で動作確認とコードレビュー</h3>
 <p><code>npm run dev</code> で表示された URL を開き、次を確認します。</p>
 <ul>
   <li>①〜④が画面から一通りできる</li>
@@ -535,19 +553,86 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
 </ul>
 <p>確認できたら Claude Code で <code>/code-review</code> と <code>/security-review</code> を実行します。指摘は自分たちで読んで、直すかどうかを判断してください（<code>--fix</code> は付けない）。直し終わったら commit します。</p>
 
-<h3 id="s6">[6] 公開する（任意）</h3>
+<h3 id="s6">[6] 公開する（代表者が1回だけ準備する）</h3>
+<p>[5] まで終わったら、班の代表者が公開の準備をします。準備は1回だけで、そのあとは <strong>main に push するたびに、GitHub Actions が自動で公開</strong>します。公開先は代表者の Cloudflare アカウントです。代表者の画面を、班のみんなで一緒に見ながら進めてください。</p>
 <ol>
-  <li>ターミナルで <code>wrangler login</code> のあと <code>wrangler whoami</code> を実行し、正しいアカウントか確認する。</li>
-  <li>Claude Code に「Cloudflare に D1 を作って、backend/wrangler.jsonc の database_id を設定して」と頼む。</li>
-  <li>ターミナルで <code>npx wrangler d1 migrations apply DB --remote</code> を実行し、本番 DB にテーブルを作る。</li>
-  <li><strong><code>backend/</code> で</strong> <code>npm run deploy</code> を実行する。<code>https://&lt;name&gt;.workers.dev</code> で開ければ完了。</li>
+  <li>代表者が Cloudflare にログインし、Workers &amp; Pages で workers.dev のサブドメイン（「Your subdomain」）を <code>cl-intern2026winter-team-&lt;班の記号&gt;</code> にする（A班なら <code>cl-intern2026winter-team-a</code>）。</li>
+  <li>API トークンを作る。Manage account → Account API tokens → Create Token で、テンプレート「Edit Cloudflare Workers」を選び、Account の D1 Edit を足す。対象は自分のアカウント、期限はワークショップの最終日にする。</li>
+  <li>Account ID をコピーする。ダッシュボードで <code>Ctrl + K</code> を押し、「Copy account ID」を選ぶ。</li>
+  <li>班のリポジトリの Settings → Secrets and variables → Actions に、次の2つを登録する。<code>CLOUDFLARE_API_TOKEN</code>（2のトークン）、<code>CLOUDFLARE_ACCOUNT_ID</code>（3の ID）。</li>
+  <li>GitHub の Actions タブ → Deploy → Run workflow で実行する。成功したら、ログに出る URL を開く。URL の後ろ半分が、1で決めたサブドメインになっているか確かめる。</li>
+  <li>デプロイできたかの確認として、URL を QR コードにして、スマートフォンでも開いてみる。PC と違うネットワーク（モバイル回線）からも開ければ、公開できています。</li>
 </ol>
-<p class="warn"><code>frontend/</code> で deploy すると API がつながりません。必ず <code>backend/</code> から deploy してください。</p>
+<p class="note">トークンは、代表者のアカウントを操作できる鍵です。Secrets に登録するだけにして、Claude Code のチャットや Slack には貼らないでください。</p>
+<p class="warn"><strong>公開した画面は、URL を知っていれば誰でも開いて書き込めます。</strong>次を守ってください。<br>・実在の個人情報や業務のデータは入れず、ダミーのデータだけを使う<br>・ログインには <code>taro@example.com</code> のようなダミーのメールアドレスを使う（一覧に表示されて、誰にでも見えるため）<br>・公開は発表までにとどめる。終わったら、講師の案内に従って片付ける</p>
 
-<h3 id="extra">時間が余ったら（オプション）</h3>
-<p>[5] まで終わって時間が余った班は、次のオプションに挑戦してください。やるかどうか、どれをやるかは班で決めて構いません。<strong>下の表はサンプルです。</strong>自分たちで考えたものでも大丈夫です。</p>
+<h3 id="review">[7] 別の班に使ってもらい、意見をもらう（相互レビュー）</h3>
+<p>公開できたら、班のパソコンで自分たちのツールを開いたままにして、<strong>班全員で別の班のパソコンに回り、お互いのツールを使い合います</strong>。使ってみて気づいた、直してほしいところや追加でほしい機能は、相手の班のパソコンに用意されたファイルに書き残します。作った人は使い方を知っているので、初めて使う人がどこで迷うか、どこが足りないかに気づけません。<strong>初めて使う人の目で見てもらうことが、このワークでいちばん大事な手順です。</strong></p>
 
-<p>オプションも、いきなり実装を頼まずに <strong>spec.md を直してから実装</strong>します。[1] と同じく、何を足すかを決めるのは自分たちです。</p>
+<h4>回る前に（自分の班のパソコンで準備する）</h4>
+<ol>
+  <li>公開した URL をブラウザで開いておく。別のタブで、この資料の自分たちの題材カードも開いておく。</li>
+  <li>次のプロンプトを Claude Code に送り、意見を書いてもらうファイル <code>feedback/review.md</code> を作る。</li>
+</ol>
+<div class="blk-label prompt">Claude Code に送る</div>
+<pre><code>次の「ここから」と「ここまで」の間の文章を、そのまま feedback/review.md の中身にして。&lt; &gt; の部分も書き換えずに残して。ファイルを作るだけでよい。
+
+ここから
+# 別の班からもらった意見
+
+## 直してほしいところ
+- &lt;何をしたら、何が起きたか／本当はどうなってほしかったか&gt;
+
+## 追加でほしい機能
+- &lt;ほしい機能／あると何がうれしいか&gt;
+
+## 依頼者の条件
+- &lt;守られていた／守られていなかった。どの操作で分かったか&gt;
+
+## よかったところ
+- &lt;よかったところ&gt;
+ここまで</code></pre>
+<ol start="3">
+  <li>できた <code>feedback/review.md</code> を、メモ帳で開いた状態にしておく。リポジトリ直下で次のコマンドを実行すると開けます。</li>
+</ol>
+<div class="blk-label term">ターミナルで実行</div>
+<pre class="term"><code>notepad feedback\review.md</code></pre>
+<ol start="4">
+  <li>ブラウザとメモ帳を開いたまま、班全員で別の班のパソコンに移動する。</li>
+</ol>
+<p class="note">書き込んでもらった意見は、自分の班に戻ってから [8] で Claude Code に読ませます。</p>
+
+<h4>回った先で（別の班のパソコンで）</h4>
+<ol>
+  <li>開いてある題材カードを読み、<strong>依頼者や、実際に使う社員になったつもりで</strong>ツールを使う。ログインはダミーのメールアドレス（例：<code>taro@example.com</code>）で。</li>
+  <li>依頼者からの条件が守られているかも確かめる。わざと条件を破る操作（同じ時間に2つ予約する、など）もしてみる。</li>
+  <li>開いてある <code>feedback/review.md</code> の <code>&lt; &gt;</code> の部分に意見を書き込み、保存する。</li>
+</ol>
+<p class="note">「使いにくい」だけでは、相手は何を直せばよいか分かりません。<strong>何をしたら、何が起きたか</strong>まで書いてください。</p>
+
+<h3 id="extra">[8] もらった意見を反映する</h3>
+<p>[7] でもらった意見をもとに、ツールを直したり機能を足したりします。全部に対応する必要はありません。班で相談して、<strong>どれをやるか、やらないかを自分たちで決めて</strong>ください。</p>
+<p>ここでも、いきなり実装を頼まずに <strong>spec.md を直してから実装</strong>します。</p>
+<ol>
+  <li>自分の班のパソコンに戻ったら、次のプロンプトを Claude Code に送り、<code>feedback/review.md</code> に書いてもらった意見を読ませる。</li>
+</ol>
+<div class="blk-label prompt">Claude Code に送る</div>
+<pre><code>別の班にツールを使ってもらい、feedback/review.md に意見を書いてもらった。読んで、次のように進めて。
+
+- まず、意見ごとに、spec.md の「機能」「ルール」「画面」「やらないこと」をどう直すかの案を、番号付きで見せて
+- どれに対応するかは私たちが決めるので、決めるまで実装しないで
+- 私たちが対応する番号を伝えたら、spec.md を直して、そのあと実装して
+- 「よかったところ」に書かれた部分は変えないこと
+- 新しいルールがあれば、ルール違反になるリクエストを API に直接送り、弾かれることを確かめて報告して</code></pre>
+<ol start="2">
+  <li>意見ごとの直し方の案が番号付きで出るので、班で相談して、対応する番号を決める。</li>
+  <li>「1 と 3 に対応して」のように番号を伝える。spec.md が直され、そのあと実装される。</li>
+  <li>動作を確かめて commit し（<code>feedback/</code> のファイルも一緒に）、main に push する。</li>
+</ol>
+<p>直して main に push すると、公開中のツールにも反映されます。時間があれば、意見をくれた班にもう一度見てもらいましょう。</p>
+
+<h4>機能のアイデア（意見が少ないとき・時間が余ったとき）</h4>
+<p>次の表はサンプルです。自分たちで考えたものでも大丈夫です。足すときも、spec.md を直してから実装します。</p>
 <div class="blk-label prompt">Claude Code に送る</div>
 <pre><code>spec.md に次の機能を足したい。
 &lt;足したい機能を1〜2文で&gt;
@@ -555,10 +640,9 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
 まず、spec.md の「機能」「ルール」「画面」「やらないこと」をどう直すかの案を見せて。
 私たちが OK と言ったら spec.md を直して、そのあと実装して。
 新しいルールがあれば、ルール違反になるリクエストを API に直接送り、弾かれることを確かめて報告して。</code></pre>
-
 <p><strong>どの題材でもできるもの</strong>（★ は難しさの目安。★ = 30分前後、★★ = 1時間前後）</p>
 <div class="table-wrap"><table class="opts">
-<thead><tr><th>オプション</th><th>中身</th><th>使うもの</th><th>難しさ</th></tr></thead>
+<thead><tr><th>追加機能</th><th>中身</th><th>使うもの</th><th>難しさ</th></tr></thead>
 <tbody>
 <tr><td>検索・絞り込み</td><td>一覧にキーワード検索や、条件での絞り込みを付ける</td><td>なし</td><td>★</td></tr>
 <tr><td>Slack に通知</td><td>登録や変更があったら Slack のチャンネルに知らせる</td><td>Slack の Incoming Webhook</td><td>★★</td></tr>
@@ -567,7 +651,7 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
 
 <p><strong>題材ごとのもの</strong></p>
 <div class="table-wrap"><table class="opts">
-<thead><tr><th>題材</th><th>オプション</th><th>中身</th><th>使うもの</th><th>難しさ</th></tr></thead>
+<thead><tr><th>題材</th><th>追加機能</th><th>中身</th><th>使うもの</th><th>難しさ</th></tr></thead>
 <tbody>
 <tr><td>備品管理システム</td><td>QR コードで貸出</td><td>備品ごとに QR コードを作って棚に貼る。読み取ると、その備品を借りる画面が開く</td><td>QR コードを作るライブラリ</td><td>★</td></tr>
 <tr><td>面談日程調整</td><td>カレンダーに追加</td><td>予約が決まったら、Google カレンダーなどに予定を入れるボタンを出す</td><td>.ics ファイル（API 不要）</td><td>★</td></tr>
@@ -586,26 +670,24 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
 </div>
 <p class="note">API キーや Webhook の URL のような秘密の値は、<code>backend/.dev.vars</code> に書いてください。事前準備の <code>.claude/settings.json</code> で、Claude Code は <code>.dev.vars</code> を読めないようにしてあるので、値が AI に送られません。Claude Code には「<code>.dev.vars</code> の <code>SLACK_WEBHOOK_URL</code> を使って」のように、<strong>名前だけ</strong>を伝えます。</p>
 
-<h2 id="git">4. Git の扱い</h2>
-<div class="tbd">
-  <p><b>【未定】班での Git の運用は当日講師から指示します。</b></p>
-  <ul>
-    <li>どの運用でも、<strong>手順が1つ終わるたびに commit</strong> してください。</li>
-    <li><code>.dev.vars</code> などの秘密情報は commit しないこと。</li>
-  </ul>
-</div>
-
-<h2 id="tips">5. 困ったとき</h2>
-<ul>
-  <li><strong>Claude Code がデザインにない機能まで作り始めた</strong> → 「デザインにない機能は作らないで」と止める。</li>
-  <li><strong>トップ以外の URL を直接開くと 404 になる</strong> → <code>assets.not_found_handling</code> が <code>"single-page-application"</code> になっているか確認する。</li>
-  <li><strong>API が <code>no such table</code> を返す</strong> → <code>--local</code>（本番なら <code>--remote</code>）でマイグレーションを適用し忘れていないか確認する。</li>
-  <li><strong>何がおかしいか分からない</strong> → エラーメッセージと「何をしたら、何が起きたか」をそのまま Claude Code に貼る。</li>
-  <li>時間が余ったら、<a href="#extra">時間が余ったら（オプション）</a>に挑戦してみてください。</li>
-</ul>
-
 <p class="foot">Webツール開発ワークショップ</p>
 </article></div>
+<script>
+// スクロールに合わせて、目次の「今読んでいる節」を色付けする
+(function () {
+  var links = [].slice.call(document.querySelectorAll('#toc a'));
+  var targets = links.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); });
+  function update() {
+    var y = window.scrollY + 120, cur = 0;
+    targets.forEach(function (t, i) { if (t && t.getBoundingClientRect().top + window.scrollY <= y) cur = i; });
+    links.forEach(function (a, i) { a.classList.toggle('cur', i === cur); });
+    if (links[cur].scrollIntoViewIfNeeded) links[cur].scrollIntoViewIfNeeded(false);
+  }
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('hashchange', update);
+  update();
+})();
+</script>
 <script>
 // 黒い枠の右上の「コピー」ボタンと、題材カードの「カードの中身をコピー」ボタン
 (function () {
