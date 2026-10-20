@@ -610,6 +610,20 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
   <li>GitHub の Actions タブ → Deploy → Run workflow で実行する。成功したら、ログに出る URL を開く。URL の後ろ半分が、1で決めたサブドメインになっているか確かめる。</li>
   <li>デプロイできたかの確認として、URL を QR コードにして、スマートフォンでも開いてみる。PC と違うネットワーク（モバイル回線）からも開ければ、公開できています。</li>
 </ol>
+<details class="spec"><summary>URL を QR コードにする方法を見る</summary>
+<p><strong>Edge の場合</strong>（Windows に最初から入っているブラウザ）</p>
+<ol>
+  <li>公開した URL を Edge で開く。</li>
+  <li>ページの何もないところで右クリックし、「このページの QR コードを作成」を選ぶ。</li>
+</ol>
+<p><strong>Chrome の場合</strong></p>
+<ol>
+  <li>公開した URL を Chrome で開く。</li>
+  <li>右上の「︙」→「キャスト、保存、共有」→「QR コードを作成」を選ぶ。</li>
+</ol>
+<p>表示された QR コードに、スマートフォンの標準のカメラアプリを向けると、画面にリンクが出ます。それを押して開きます。</p>
+<p class="note">メニューの名前や場所は、ブラウザの版によって少し違うことがあります。見つからなければ、右クリックのメニューや「︙」のメニューの中を探してください。</p>
+</details>
 <p class="note">トークンは、代表者のアカウントを操作できる鍵です。Secrets に登録するだけにして、Claude Code のチャットや Slack には貼らないでください。</p>
 <p class="warn"><strong>公開した画面は、URL を知っていれば誰でも開いて書き込めます。</strong>次を守ってください。<br>・実在の個人情報や業務のデータは入れず、ダミーのデータだけを使う<br>・ログインには <code>taro@example.com</code> のようなダミーのメールアドレスを使う（一覧に表示されて、誰にでも見えるため）<br>・公開は発表までにとどめる。終わったら、講師の案内に従って片付ける</p>
 
