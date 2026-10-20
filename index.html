@@ -149,6 +149,16 @@ body.slide-mode{overflow:hidden;}
 #slides .nav button{padding:.35em .9em; border:1px solid #6b6453; border-radius:8px; background:#2d2a24; color:#f4efe4; font-family:inherit; cursor:pointer;}
 #slides .nav button:hover{background:#3b372f;}
 #slides .count{min-width:4.5em; text-align:center;}
+#slides .tree{white-space:pre; font-family:"SFMono-Regular",Menlo,Consolas,monospace; font-size:22px; line-height:1.55;
+  background:#2d2a24; color:#f4efe4; border-radius:12px; padding:18px 24px; margin:.2em 0 .6em;}
+#slides .tree b{color:#7dd3c8; font-weight:600;}
+#slides .tree i{color:#c8a96a; font-style:normal;}
+#slides .chain{display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin:.4em 0 1em; font-size:24px;}
+#slides .chain span{background:#fff; border:2px solid var(--line); border-radius:10px; padding:.3em .8em;}
+#slides .chain span.hub{border-color:var(--accent); background:#f0fafa; font-weight:700; color:var(--accent-deep);}
+#slides .chain i{font-style:normal; color:var(--muted);}
+#slides table.compact td:first-child{white-space:nowrap; font-weight:700; color:var(--accent-deep);}
+#slides .example{font-size:22px; background:#f7f3e8; border-left:5px solid var(--gold); border-radius:0 10px 10px 0; padding:.5em .9em; margin-top:.6em;}
 @media print{#slide-toggle,#slides{display:none !important;}}
 </style>
 </head>
@@ -708,13 +718,53 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
 </section>
 
 <section class="slide">
-  <h2>作るものの全体像</h2>
-  <div class="arch3"><div>ブラウザ<br><span class="muted">画面</span></div><i>→</i><div class="w">Cloudflare Worker（1つ）<br><span class="muted">画面のファイル ＋ API</span></div><i>→</i><div>D1<br><span class="muted">データベース</span></div></div>
+  <div class="kicker">作るものの全体像 1/4</div>
+  <h2>画面と API を、1つの Worker から届ける</h2>
+  <div class="arch3"><div>ブラウザ<br><span class="muted">画面を表示</span></div><i>→</i><div class="w">Cloudflare Worker（1つ）<br><span class="muted">画面のファイル ＋ API（/api/...）</span></div><i>→</i><div>D1<br><span class="muted">データベース</span></div></div>
   <ul>
-    <li>画面：React（デザインは <strong>Claude Design</strong>）</li>
-    <li>API：Hono、データベース：D1</li>
-    <li>実装は <strong>Claude Code</strong> に頼む。<strong>何を作るかを決めるのは自分たち</strong></li>
+    <li>画面も API も<strong>同じ場所</strong>から出るので、画面は <strong>/api/...</strong> を呼ぶだけで済む</li>
+    <li>データは D1 に保存するので、<strong>再読み込みしても消えない</strong></li>
+    <li>ルールの判定（ダブルブッキングを防ぐ、など）は <strong>API の中</strong>で行う</li>
   </ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">作るものの全体像 2/4</div>
+  <h2>使う道具と役割</h2>
+  <table class="compact"><tbody>
+    <tr><td>デザイン</td><td>Claude Design：spec.md から画面のデザインを作る</td></tr>
+    <tr><td>実装・レビュー</td><td>Claude Code：コードを書く・直す・点検する</td></tr>
+    <tr><td>画面</td><td>Vite ＋ React ＋ TypeScript、Tailwind CSS ＋ shadcn/ui</td></tr>
+    <tr><td>API</td><td>Hono（TypeScript）を Cloudflare Workers で動かす</td></tr>
+    <tr><td>データベース</td><td>Cloudflare D1（SQLite）</td></tr>
+    <tr><td>公開</td><td>main に push すると自動で公開（詳しくは資料の [6]）</td></tr>
+  </tbody></table>
+  <p class="muted">どれも AI が書き慣れている定番の組み合わせ。コードは Claude Code が書くので、名前を覚えなくても大丈夫</p>
+</section>
+
+<section class="slide">
+  <div class="kicker">作るものの全体像 3/4</div>
+  <h2>できあがるフォルダ</h2>
+  <div class="tree">リポジトリ/
+├── spec.md        <i>[1] 壁打ちで決めた要件</i>
+├── design.zip     <i>[2] Claude Design から書き出したデザイン</i>
+├── frontend/      <i>[3] 画面（React）</i>
+├── backend/       <i>[4] API とテーブル定義。雛形は講師が用意</i>
+├── <b>.github/</b>       <i>講師：自動で公開する仕組み</i>
+├── <b>.claude/</b>       <i>講師：Claude Code にさせない操作の設定</i>
+└── <b>CLAUDE.md</b>      <i>講師：Claude Code への注意書き</i></div>
+  <p>手順が進むごとに、上から順にファイルが増えていく。<strong>講師のファイル（色付き）は変えない</strong></p>
+</section>
+
+<section class="slide">
+  <div class="kicker">作るものの全体像 4/4</div>
+  <h2>ログインは「メールアドレスだけ」の簡易版</h2>
+  <ul>
+    <li>パスワードは無い。<strong>メールアドレスを入力するだけ</strong>でログインできる</li>
+    <li>API は、送られてきたメールアドレスを<strong>そのまま本人とみなす</strong></li>
+    <li>作りが簡単な代わりに、他人のアドレスを入れれば<strong>なりすませる</strong></li>
+  </ul>
+  <p class="example">だから、公開した画面には<strong>ダミーのデータとダミーのメールアドレス</strong>（taro@example.com など）だけを使う</p>
 </section>
 
 <section class="slide">
@@ -744,13 +794,52 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
 </section>
 
 <section class="slide">
-  <h2>[1] spec.md がすべての出発点</h2>
+  <div class="kicker">[1] 要件を決める 1/4</div>
+  <h2>いきなり画面を作らず、spec.md から</h2>
+  <div class="chain"><span>題材カード</span><i>→</i><span class="hub">spec.md</span><i>→</i><span>[2] デザイン</span><i>→</i><span>[3][4] 実装</span><i>→</i><span>[7][8] レビューと修正</span></div>
   <ul>
-    <li>Claude Code に<strong>聞き役</strong>をしてもらい、質問に答えて要件を固める</li>
-    <li><strong>決めるのは自分たち</strong>。AI は質問と整理を手伝うだけ</li>
-    <li>AI の提案は、<strong>「なぜ必要か」を班で言えるものだけ</strong>採用する</li>
-    <li>できた spec.md を元に、デザイン・実装・追加機能まで進める</li>
+    <li>spec.md は「<strong>何を作るか</strong>」を1枚にまとめた要件のメモ</li>
+    <li>デザインも実装も追加機能も、<strong>すべて spec.md を元に</strong>進める</li>
+    <li>使う技術は書かない。だから<strong>技術が変わってもそのまま使える</strong></li>
+    <li>目安は <strong>30分</strong></li>
   </ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">[1] 要件を決める 2/4</div>
+  <h2>Claude Code に「聞き役」をしてもらう</h2>
+  <p>題材カードを貼って送ると、Claude Code が<strong>1つずつ質問</strong>してくる。班で相談して答える</p>
+  <div class="chain"><span>困りごとの言い直し</span><i>→</i><span>使う人と場面</span><i>→</i><span>機能</span><i>→</i><span>ルールの細部</span><i>→</i><span>画面</span></div>
+  <ul>
+    <li>機能は <strong>3〜5個</strong>に絞る。増えすぎたら優先順位を聞かれる</li>
+    <li>ログイン方法・使う技術・色やレイアウトは聞かれない（決まっている／あとで決める）</li>
+    <li>最後にまとめが出たら読み合わせ、OK と答えると spec.md が書き出される</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="kicker">[1] 要件を決める 3/4</div>
+  <h2>spec.md に書くこと</h2>
+  <table class="compact"><tbody>
+    <tr><td>依頼者と困っていること</td><td>誰が、何に困っているか</td></tr>
+    <tr><td>使う人と場面</td><td>誰が、いつ・どこで使うか</td></tr>
+    <tr><td>機能</td><td>3〜5個。共通の流れ（ログイン・登録・一覧・固有ロジック）のどれに当たるか</td></tr>
+    <tr><td>ルール</td><td>ルール／違反したらどうなるか／根拠（依頼者の条件か、班で決めたか）</td></tr>
+    <tr><td>画面</td><td>画面ごとに、何が表示されて何ができるか（レイアウトは書かない）</td></tr>
+    <tr><td>やらないこと</td><td>今回は作らないと決めたもの</td></tr>
+  </tbody></table>
+</section>
+
+<section class="slide">
+  <div class="kicker">[1] 要件を決める 4/4</div>
+  <h2>決めるのは自分たち</h2>
+  <ul>
+    <li>AI の提案は、<strong>「なぜ必要か」を班で言えるものだけ</strong>採用する</li>
+    <li>言えないものは「<strong>やらないこと</strong>」に入れてよい</li>
+    <li><strong>依頼者の条件は削らない</strong>。あいまいなところは、どう解釈するかを班で決める</li>
+    <li>特に大事なのは<strong>ルール</strong>。ここが [4] で API が守る中身になる</li>
+  </ul>
+  <p class="example">ルールの例（置き傘シェア）：貸出中の傘は、別の人が借りられない ／「貸出中です」と出して借りられない ／ 依頼者の条件</p>
 </section>
 
 <section class="slide">
