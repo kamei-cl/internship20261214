@@ -114,9 +114,46 @@ p.tier{margin:1.8em 0 .4em; font-size:.85rem; font-weight:700; color:#a3661b; le
   .wrap{margin-left:0; padding:16px 0 80px;}
   article{padding:28px 16px; border-radius:0;}
 }
+/* ===== スライド表示 ===== */
+#slide-toggle{position:fixed; top:14px; right:16px; z-index:20; padding:.45em 1em; border:1px solid var(--accent); border-radius:999px;
+  background:var(--paper); color:var(--accent-deep); font:700 .85rem/1.2 inherit; font-family:inherit; cursor:pointer; box-shadow:0 2px 10px rgba(60,50,30,.12);}
+#slide-toggle:hover{background:#e6fafa;}
+#slides{display:none; position:fixed; inset:0; z-index:30; background:#1f1d19;}
+body.slide-mode #slides{display:block;}
+body.slide-mode{overflow:hidden;}
+#slides .stage{position:absolute; left:50%; top:50%; width:1280px; height:720px; transform-origin:center center;}
+#slides .slide{display:none; position:absolute; inset:0; background:var(--paper); border-radius:14px; padding:64px 84px; overflow:hidden;
+  font-size:28px; line-height:1.6; color:var(--ink);}
+#slides .slide.active{display:flex; flex-direction:column;}
+#slides .slide h2{margin:0 0 .7em; padding:0 0 .35em; background:none; border:none; border-bottom:4px solid var(--gold); border-radius:0;
+  font-size:46px; line-height:1.3;}
+#slides .slide .kicker{color:var(--accent-deep); font-weight:700; font-size:22px; letter-spacing:.06em; margin-bottom:.3em;}
+#slides .slide ul,#slides .slide ol{margin:.2em 0; padding-left:1.3em;}
+#slides .slide li{margin:.35em 0;}
+#slides .slide strong{color:var(--accent-deep);}
+#slides .slide .big{font-size:36px; font-weight:700; line-height:1.5;}
+#slides .slide .muted{color:var(--muted); font-size:22px;}
+#slides .slide.title{justify-content:center; background:linear-gradient(135deg,#f0fafa 0%,var(--paper) 60%);}
+#slides .slide.title h2{font-size:64px; border-bottom-width:6px;}
+#slides .flow{font-size:26px;}
+#slides .cols{display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:start;}
+#slides .box{background:#f7f3e8; border:1px solid var(--line); border-radius:12px; padding:.6em .9em;}
+#slides .box h3{margin:0 0 .3em; padding:0; border:none; font-size:28px; color:var(--accent-deep);}
+#slides table{font-size:24px;}
+#slides th,#slides td{padding:8px 14px;}
+#slides .arch3{display:flex; align-items:center; gap:18px; margin:.6em 0 1em; font-size:24px;}
+#slides .arch3 div{background:#fff; border:2px solid var(--gold); border-radius:12px; padding:.5em .9em; text-align:center; line-height:1.4;}
+#slides .arch3 div.w{border-color:var(--accent); background:#f0fafa;}
+#slides .arch3 i{font-style:normal; color:var(--muted); font-size:30px;}
+#slides .nav{position:absolute; left:0; right:0; bottom:14px; display:flex; justify-content:center; align-items:center; gap:14px; color:#d6d3ca; font-size:14px;}
+#slides .nav button{padding:.35em .9em; border:1px solid #6b6453; border-radius:8px; background:#2d2a24; color:#f4efe4; font-family:inherit; cursor:pointer;}
+#slides .nav button:hover{background:#3b372f;}
+#slides .count{min-width:4.5em; text-align:center;}
+@media print{#slide-toggle,#slides{display:none !important;}}
 </style>
 </head>
 <body>
+<button id="slide-toggle" type="button" title="スライド表示に切り替え（← → で移動、Esc で戻る）">▶ スライドで見る</button>
 <nav id="toc">
   <div class="head">目次</div>
   <a href="#goal">0. この資料について</a>
@@ -648,6 +685,155 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
 
 <p class="foot">Webツール開発ワークショップ</p>
 </article></div>
+
+<div id="slides" aria-label="スライド表示">
+<div class="stage">
+
+<section class="slide title">
+  <div class="kicker">インターンシップ</div>
+  <h2>Webツール開発ワークショップ</h2>
+  <p class="big">Claude Design と Claude Code で、<br>社内向けの小さな Web ツールを班で作る</p>
+  <p class="muted">← → キーで移動／Esc で資料に戻る</p>
+</section>
+
+<section class="slide">
+  <h2>今日のゴール</h2>
+  <ol>
+    <li>メールアドレスでログインできる</li>
+    <li>データを登録できる</li>
+    <li>登録したデータが一覧に出て、<strong>再読み込みしても消えない</strong></li>
+    <li>題材ごとの<strong>固有ロジック</strong>が動き、ルール違反は <strong>API でも</strong>弾く</li>
+    <li><strong>別の班に使ってもらい</strong>、もらった意見で直す</li>
+  </ol>
+</section>
+
+<section class="slide">
+  <h2>作るものの全体像</h2>
+  <div class="arch3"><div>ブラウザ<br><span class="muted">画面</span></div><i>→</i><div class="w">Cloudflare Worker（1つ）<br><span class="muted">画面のファイル ＋ API</span></div><i>→</i><div>D1<br><span class="muted">データベース</span></div></div>
+  <ul>
+    <li>画面：React（デザインは <strong>Claude Design</strong>）</li>
+    <li>API：Hono、データベース：D1</li>
+    <li>実装は <strong>Claude Code</strong> に頼む。<strong>何を作るかを決めるのは自分たち</strong></li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>題材は7つから班で1つ</h2>
+  <div class="cols">
+    <div class="box"><h3>まじめ枠</h3>備品管理／面談日程調整<br>会議室予約／日報システム</div>
+    <div class="box"><h3>真面目に不真面目枠</h3>置き菓子リクエスト<br>定時退社宣言ボード／飲食店ガチャ</div>
+  </div>
+  <p class="flow" style="margin-top:1em">共通の流れ：① ログイン → ② 登録 → ③ 一覧 → <strong>④ 固有ロジック</strong></p>
+  <p>どの題材も①〜③はほぼ同じ。<strong>違いは④だけ</strong>なので、ここが腕の見せどころ</p>
+</section>
+
+<section class="slide">
+  <h2>作業の流れ</h2>
+  <table>
+    <tbody>
+      <tr><td>[1]</td><td>壁打ちで要件を決め、spec.md にまとめる</td><td>30分</td></tr>
+      <tr><td>[2]</td><td>画面をデザインする（Claude Design）</td><td>30分</td></tr>
+      <tr><td>[3]</td><td>フロントを作る（まずはモックデータ）</td><td>60分</td></tr>
+      <tr><td>[4]</td><td>API とデータベースを作り、つなぐ</td><td>75〜90分</td></tr>
+      <tr><td>[5]</td><td>班の中で動作確認とコードレビュー</td><td>20分</td></tr>
+      <tr><td>[6]</td><td>公開する</td><td>20分</td></tr>
+      <tr><td>[7]</td><td><strong>別の班に使ってもらう</strong></td><td>30分</td></tr>
+      <tr><td>[8]</td><td>もらった意見を反映する</td><td>残り</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>[1] spec.md がすべての出発点</h2>
+  <ul>
+    <li>Claude Code に<strong>聞き役</strong>をしてもらい、質問に答えて要件を固める</li>
+    <li><strong>決めるのは自分たち</strong>。AI は質問と整理を手伝うだけ</li>
+    <li>AI の提案は、<strong>「なぜ必要か」を班で言えるものだけ</strong>採用する</li>
+    <li>できた spec.md を元に、デザイン・実装・追加機能まで進める</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>[4] ルールは API でも守る</h2>
+  <p class="big">画面のチェックだけでは、<br>API を直接呼ばれたら素通りしてしまう</p>
+  <ul>
+    <li>画面のチェック：利用者の入力ミスを防ぐため</li>
+    <li>API のチェック：<strong>ルールを確実に守る</strong>ため</li>
+    <li>ルール違反のリクエストを API に直接送り、<strong>弾かれることを確かめる</strong>ところまで Claude Code にやらせる</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>[7] 別の班に使ってもらう</h2>
+  <div class="cols">
+    <div class="box"><h3>回る前に</h3>ツールを開き、意見を書くファイル（feedback/review.md）をメモ帳で開いておく</div>
+    <div class="box"><h3>回った先で</h3>依頼者になったつもりで使う。条件を破る操作も試し、ファイルに意見を書く</div>
+  </div>
+  <ul style="margin-top:.8em">
+    <li><strong>班全員で</strong>別の班のパソコンへ移動する</li>
+    <li>「使いにくい」ではなく、<strong>何をしたら、何が起きたか</strong>を書く</li>
+    <li>戻ったら [8] で、意見を Claude Code に読ませて直す</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>作業中に守ること</h2>
+  <ul>
+    <li><strong>こまめに commit</strong>：手順が1つ終わるたびに。ブランチで作業して main にマージ</li>
+    <li><strong>秘密の値を渡さない</strong>：commit しない、Claude Code のチャットにも貼らない</li>
+    <li><strong>講師のファイルを変えない</strong>：.github/、.claude/、backend/wrangler.jsonc など</li>
+    <li><strong>公開した画面にはダミーのデータだけ</strong>：ログインは taro@example.com のようなダミーで</li>
+    <li><strong>困ったら Claude Code に相談</strong>：エラーと「何をしたら何が起きたか」を貼る</li>
+  </ul>
+</section>
+
+<section class="slide title">
+  <h2>はじめましょう</h2>
+  <ol>
+    <li>資料の<strong>「事前準備」</strong>で、リポジトリのフォルダに移動する</li>
+    <li><strong>題材カード</strong>を読んで、班で題材を1つ選ぶ</li>
+    <li>資料の <strong>[1]</strong> のプロンプトで、壁打ちを始める</li>
+  </ol>
+  <p class="muted">手順の詳細とプロンプトは、すべて資料にあります</p>
+</section>
+
+</div>
+<div class="nav"><button type="button" data-go="-1">← 前へ</button><span class="count"></span><button type="button" data-go="1">次へ →</button><button type="button" data-close>資料に戻る（Esc）</button></div>
+</div>
+<script>
+// スライド表示：右上のボタンで切り替え。← → / スペースで移動、Esc で資料に戻る
+(function () {
+  var root = document.getElementById('slides');
+  var stage = root.querySelector('.stage');
+  var list = [].slice.call(root.querySelectorAll('.slide'));
+  var count = root.querySelector('.count');
+  var cur = 0;
+  function fit() {
+    var k = Math.min(window.innerWidth / 1340, (window.innerHeight - 56) / 760);
+    stage.style.transform = 'translate(-50%, calc(-50% - 18px)) scale(' + k + ')';
+  }
+  function go(n) {
+    cur = Math.max(0, Math.min(list.length - 1, n));
+    list.forEach(function (sl, i) { sl.classList.toggle('active', i === cur); });
+    count.textContent = (cur + 1) + ' / ' + list.length;
+  }
+  function open() { document.body.classList.add('slide-mode'); fit(); go(cur); }
+  function close() { document.body.classList.remove('slide-mode'); }
+  document.getElementById('slide-toggle').addEventListener('click', open);
+  root.querySelector('[data-close]').addEventListener('click', close);
+  root.querySelectorAll('[data-go]').forEach(function (b) {
+    b.addEventListener('click', function () { go(cur + Number(b.dataset.go)); });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!document.body.classList.contains('slide-mode')) return;
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); go(cur + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(cur - 1); }
+    else if (e.key === 'Escape') { close(); }
+  });
+  window.addEventListener('resize', function () { if (document.body.classList.contains('slide-mode')) fit(); });
+  go(0);
+})();
+</script>
 <script>
 // スクロールに合わせて、目次の「今読んでいる節」を色付けする
 (function () {
