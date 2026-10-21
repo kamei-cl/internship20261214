@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>講師からのお題：本物のログイン｜Webツール開発ワークショップ</title>
+<style>
+:root{
+  --bg:#d6d3ca; --paper:#fffdf8; --ink:#2d2a24; --muted:#6b6453;
+  --accent:#0d9488; --accent-deep:#0f766e; --gold:#c8a96a; --line:#e7e1d3;
+  --code-bg:#f3efe4; --warn-bg:#fcf3e6; --warn-bd:#e3b873;
+  --danger-bg:#fef0ec; --danger-bd:#dc6931; --danger-text:#8a3010;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,system-ui,sans-serif;
+  line-height:1.85; font-size:16px;
+}
+.wrap{margin-left:260px; padding:56px 28px 120px;}
+article{
+  max-width:920px; margin:0 auto;
+  background:var(--paper); border:1px solid var(--line); border-radius:16px;
+  padding:48px 56px; box-shadow:0 8px 40px rgba(60,50,30,.06);
+}
+h1,h2,h3{font-family:"Hiragino Mincho ProN","Yu Mincho",serif; line-height:1.4; scroll-margin-top:1em;}
+h1{font-size:2rem; margin:0 0 .6em; padding-bottom:.5em; border-bottom:3px solid var(--gold);}
+h2{font-size:1.45rem; margin:3.6em 0 .9em; padding:.35em .8em;
+  border-left:6px solid var(--accent); border-radius:0 6px 6px 0; background:#f0fafa;}
+h3{font-size:1.12rem; margin:2.4em 0 .6em; padding-bottom:.3em; border-bottom:1px solid var(--line);}
+h2 + h3{margin-top:1.2em;}
+h4{font-size:1rem; margin:1.8em 0 .5em; scroll-margin-top:1em;}
+p{margin:.85em 0}
+a{color:var(--accent);}
+ul,ol{margin:.8em 0 1.1em; padding-left:1.6em}
+li{margin:.35em 0}
+li::marker{color:var(--gold)}
+ol>li{margin:1em 0;}
+code{background:var(--code-bg); padding:.12em .42em; border-radius:5px; font-size:.9em;
+  font-family:"SFMono-Regular",Menlo,Consolas,monospace; color:#7a4f2a;}
+pre{background:#2d2a24; color:#f4efe4; padding:18px 20px; border-radius:10px; overflow:auto;
+  font-size:.86rem; line-height:1.6; margin:1.1em 0; white-space:pre-wrap;}
+pre code{background:none; color:inherit; padding:0; font-size:.95em;}
+p.note{margin:.9em 0; padding:.7em 1.1em; background:#f5f2ea; border-left:3px solid var(--line);
+  border-radius:0 6px 6px 0; font-size:.92rem; color:var(--muted);}
+p.key{margin:1em 0; padding:.9em 1.2em; background:var(--warn-bg);
+  border-left:5px solid var(--warn-bd); border-radius:0 8px 8px 0; color:#5c4a2e;}
+p.warn{margin:1em 0; padding:.85em 1.2em; background:var(--danger-bg);
+  border-left:5px solid var(--danger-bd); border-radius:0 8px 8px 0; color:var(--danger-text); font-size:.97rem;}
+h3.done{padding:.55em .95em; background:#e6fafa; border-bottom:none;
+  border-left:5px solid var(--accent); border-radius:0 8px 8px 0; color:var(--accent-deep); font-size:1.05rem;}
+.blk-label{display:block; width:fit-content; margin:1.2em 0 0; line-height:1.6; padding:.15em .7em; border-radius:6px 6px 0 0; font-size:.78rem; font-weight:700; letter-spacing:.03em; color:#fff;}
+.blk-label + pre{margin-top:0; border-top-left-radius:0;}
+.blk-label.prompt{background:var(--accent);}
+.blk-label.design{background:#7c5cbf;}
+.blk-label.term{background:#1f2937;}
+.blk-label.file{background:#a3661b;}
+.blk-label.ref{background:#8a8272;}
+pre.term{background:#111827; color:#e5e7eb; border-left:4px solid #4b5563;}
+ul.legend{list-style:none; padding-left:0;}
+ul.legend li{display:flex; flex-wrap:wrap; align-items:center; gap:6px; font-size:.9rem;}
+ul.legend .blk-label{display:inline-block; margin:0; border-radius:6px;}
+pre{position:relative;}
+.copy-btn{position:absolute; top:8px; right:8px; padding:.2em .7em; border:1px solid rgba(255,255,255,.25); border-radius:6px;
+  background:rgba(255,255,255,.08); color:#f4efe4; font-size:.75rem; font-family:inherit; cursor:pointer; opacity:.75; transition:opacity .15s, background .15s;}
+.copy-btn:hover, .copy-btn:focus-visible{opacity:1; background:rgba(255,255,255,.18);}
+.card-copy{display:inline-block; margin:.6em 0 .2em; padding:.25em .9em; border:1px solid var(--accent); border-radius:6px;
+  background:#fff; color:var(--accent-deep); font-size:.82rem; font-family:inherit; cursor:pointer;}
+.card-copy:hover, .card-copy:focus-visible{background:#e6fafa;}
+.card-copy.done{background:var(--accent); color:#fff;}
+.copy-btn.done{opacity:1; background:var(--accent); border-color:var(--accent);}
+pre code{display:block; padding-right:4.5em;}
+.table-wrap{overflow-x:auto; margin:1.1em 0;}
+table.opts th:last-child, table.opts td:last-child{white-space:nowrap;}
+table{border-collapse:collapse; width:100%; font-size:.92rem; background:#fff; border:1px solid var(--line);}
+th,td{padding:9px 12px; border:1px solid var(--line); text-align:left; vertical-align:top;}
+td:first-child{white-space:nowrap;}
+thead th{background:var(--accent); color:#fff; font-weight:600; border-color:var(--accent);}
+tbody tr:nth-child(even){background:#faf7ef}
+.flow{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:1.2em 0; font-weight:700;}
+.flow span{background:#e6fafa; border:1px solid #b5e3de; color:var(--accent-deep); padding:.35em .9em; border-radius:999px;}
+.flow i{color:var(--gold); font-style:normal;}
+.flow span.own{background:var(--warn-bg); border-color:var(--warn-bd); color:#7a4f2a;}
+.arch{width:100%; height:auto; display:block; margin:1.2em 0;}
+.tbd{border:2px dashed var(--warn-bd); border-radius:10px; padding:.6em 1.2em; background:#fffaf0;}
+.tbd b{color:#a3661b;}
+details.spec{margin:1.1em 0; border:1px solid var(--line); border-radius:10px; background:#fbf9f2; padding:0 1.1em;}
+details.spec>summary{cursor:pointer; padding:.7em .2em; font-weight:600; color:var(--accent-deep);}
+details.spec[open]{padding-bottom:.6em;}
+details.card{margin:.7em 0; border:1px solid var(--line); border-radius:10px; background:#fbf9f2; padding:0 1.1em;}
+details.card>summary{cursor:pointer; padding:.7em .2em; font-weight:700; color:var(--accent-deep);}
+details.card[open]{padding-bottom:.6em;}
+details.card dl{margin:.2em 0 .4em;}
+details.card dt{font-size:.82rem; font-weight:700; color:var(--muted); margin-top:.7em;}
+details.card dd{margin:.2em 0 0; font-size:.92rem;}
+details.card dd ul{margin:.2em 0; padding-left:1.3em;}
+details.card dd li{margin:.15em 0;}
+details.card dd.req{background:#fff; border:1px solid var(--line); border-radius:8px; padding:.6em .9em; line-height:1.8;}
+details.hint{margin:.8em 0 .2em; font-size:.88rem;}
+details.hint>summary{cursor:pointer; color:var(--muted);}
+details.hint .chips{margin-top:.5em;}
+.chips{display:flex; flex-wrap:wrap; gap:6px;}
+.chips span{background:#fff; border:1px solid var(--line); border-radius:999px; padding:.1em .75em; font-size:.85rem;}
+p.tier{margin:1.8em 0 .4em; font-size:.85rem; font-weight:700; color:#a3661b; letter-spacing:.05em;}
+#toc{position:fixed; top:0; left:0; width:260px; height:100vh; overflow-y:auto;
+  background:var(--paper); border-right:1px solid var(--line); padding:3em 18px 24px;}
+#toc .head{font-family:"Hiragino Mincho ProN","Yu Mincho",serif; color:var(--muted);
+  border-bottom:2px solid var(--line); padding-bottom:8px; margin-bottom:10px;}
+#toc a{display:block; padding:.28em .5em; border-radius:5px; text-decoration:none; color:var(--ink); font-size:.88rem;}
+#toc a:hover{background:var(--code-bg); color:var(--accent);}
+#toc a.sub{padding-left:1.4em; font-size:.84rem; color:var(--muted);}
+#toc a.cur{background:#e6fafa; color:var(--accent-deep); font-weight:700;}
+.foot{text-align:center; color:var(--muted); font-size:.8rem; margin-top:30px}
+@media(max-width:900px){
+  #toc{display:none;}
+  .wrap{margin-left:0; padding:16px 0 80px;}
+  article{padding:28px 16px; border-radius:0;}
+}
+</style>
+</head>
+<body>
+<nav id="toc">
+  <div class="head">目次</div>
+  <a href="#odai">0. 講師からのお題</a>
+  <a href="#clerk">1. Clerk とは</a>
+  <a class="sub" href="#flow">ログインの流れ</a>
+  <a class="sub" href="#keys">3種類の鍵</a>
+  <a href="#prep">2. 準備</a>
+  <a href="#impl">3. 導入する</a>
+  <a class="sub" href="#impl1">① spec.md を直す</a>
+  <a class="sub" href="#impl2">② 画面に Clerk を入れる</a>
+  <a class="sub" href="#impl3">③ API で証明書を確かめる</a>
+  <a href="#check">4. 確かめる</a>
+  <a href="#trouble">5. 困ったとき</a>
+  <a class="sub" href="#done">完了の定義</a>
+</nav>
+
+<div class="wrap"><article>
+
+<h1>講師からのお題：本物のログインにしよう</h1>
+<p>Webツール開発ワークショップの追加のお題です。<a href="./">本編の資料</a>の [8] まで終わり、時間が余っている班が取り組みます。</p>
+
+<h2 id="odai">0. 講師からのお題</h2>
+<p class="key">今のツールのログインを、<strong>Clerk（クラーク）</strong>という外部のサービスを使った<strong>本物のログイン</strong>に置き換えてください。</p>
+
+<h3>なぜやるのか</h3>
+<p>今のツールのログインは、メールアドレスを入力するだけの<strong>簡易版</strong>です。API は、送られてきたメールアドレスをそのまま本人とみなしています。そのため、<strong>他人のメールアドレスを入れれば、その人になりすませます</strong>。[7] の相互レビューで「なりすませた」と指摘された班もあるかもしれません。</p>
+<p>実際のサービスでは、ログインの仕組みを自分で一から作ることはあまりありません。パスワードの保存や、ログイン状態の管理を間違えると、そのまま情報漏えいにつながるからです。そこで、ログインを専門に引き受ける<strong>外部のサービス</strong>と連携するのが一般的です。このお題では、その連携を体験します。</p>
+
+<h3 class="done">✅ ゴール</h3>
+<ol>
+  <li>Clerk のサインイン画面からログインできる。ログインしないとツールを使えない</li>
+  <li>API は、Clerk が発行した「ログイン済みの証明書」を確かめて本人を決める。<strong>他人になりすませない</strong></li>
+  <li>公開した URL でも、同じようにログインして使える</li>
+</ol>
+
+<h3>進め方と目安</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>手順</th><th>やること</th><th>目安</th></tr></thead>
+<tbody>
+<tr><td><a href="#clerk">1</a></td><td>Clerk の仕組みを知る（この資料を読む）</td><td>10分</td></tr>
+<tr><td><a href="#prep">2</a></td><td>講師から鍵を受け取る</td><td>5分</td></tr>
+<tr><td><a href="#impl">3</a></td><td>Claude Code で導入する</td><td>30〜40分</td></tr>
+<tr><td><a href="#check">4</a></td><td>手元と公開先で確かめる</td><td>15分</td></tr>
+</tbody></table></div>
+<p class="note">本編と同じく、いきなり実装を頼まずに <strong>spec.md を直してから</strong>実装します。何をどう変えるかを決めるのは自分たちです。</p>
+
+<h2 id="clerk">1. Clerk とは</h2>
+<p>Clerk は、<strong>ログインの仕組みをまるごと引き受けてくれるサービス</strong>です。サインイン画面、ユーザーの登録と管理、ログイン状態の管理を Clerk が用意してくれます。自分たちが書くのは、<strong>「このリクエストは本当にログインした本人から来たか」を確かめる部分</strong>だけです。</p>
+<p>Clerk のサーバーは、世界中のたくさんのサービスのログインを同時に引き受けています。そのため Clerk を使うには、<strong>「このツールのログインを引き受けてほしい」という登録</strong>が必要です。Clerk ではこの登録を「<strong>アプリケーション</strong>」と呼びます（プログラムを作るという意味ではありません）。登録ごとに、次のものが分かれます。</p>
+<ul>
+  <li>ユーザーの名簿（ほかの登録のユーザーとは混ざらない）</li>
+  <li>ログインの方法（Google アカウント、メールに届くコード など）</li>
+  <li>ログインを受け付けるサイト（URL）</li>
+  <li>鍵（下の「3種類の鍵」）</li>
+</ul>
+
+<h3 id="flow">ログインの流れ</h3>
+<div class="flow"><span>① Clerk の画面でログイン</span><i>→</i><span>② Clerk が証明書を発行</span><i>→</i><span>③ 画面が API に証明書を送る</span><i>→</i><span class="own">④ API が証明書を確かめる</span></div>
+<ol>
+  <li><strong>ログイン</strong>：利用者は、Clerk が用意したサインイン画面でログインします。</li>
+  <li><strong>証明書の発行</strong>：ログインに成功すると、Clerk が「この人はログイン済みです」という<strong>証明書</strong>（セッショントークン。JWT という形式）を発行します。証明書には Clerk の<strong>署名</strong>が付いていて、書き換えると署名が合わなくなります。</li>
+  <li><strong>API を呼ぶ</strong>：画面は、API を呼ぶたびに証明書を一緒に送ります。</li>
+  <li><strong>確かめる</strong>：API は、証明書の署名が本物か、有効期限が切れていないかを確かめます。本物なら、証明書に書かれた<strong>ユーザー ID</strong> を本人とみなします。</li>
+</ol>
+
+<h3>今の簡易ログインとの違い</h3>
+<div class="table-wrap"><table>
+<thead><tr><th></th><th>今の簡易ログイン</th><th>Clerk</th></tr></thead>
+<tbody>
+<tr><td>本人をどう決めるか</td><td>送られてきたメールアドレスを、そのまま信じる（自己申告）</td><td>Clerk の署名付きの証明書を確かめる</td></tr>
+<tr><td>なりすまし</td><td>他人のメールアドレスを送ればできる</td><td>証明書を偽造できないので、できない</td></tr>
+<tr><td>サインイン画面</td><td>自分たちで作った入力欄</td><td>Clerk が用意した画面</td></tr>
+</tbody></table></div>
+
+<h3 id="keys">3種類の鍵</h3>
+<p>Clerk には鍵が3種類あります。<strong>今回使うのは、公開してよい2つだけ</strong>です。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>鍵</th><th>使う場所</th><th>役割</th><th>公開してよいか</th></tr></thead>
+<tbody>
+<tr><td>Publishable key</td><td>画面</td><td>どの登録（アプリケーション）のログインかを、Clerk に伝える</td><td>よい</td></tr>
+<tr><td>JWKS Public Key（公開鍵）</td><td>API</td><td>証明書の署名が本物かを確かめる</td><td>よい</td></tr>
+<tr><td>Secret key</td><td>（今回は使わない）</td><td>Clerk の管理機能を操作する</td><td><strong>だめ</strong></td></tr>
+</tbody></table></div>
+<p class="note">公開鍵は「鍵を開ける」ためではなく、「署名が本物か確かめる」ための鍵です。署名を作れるのは Clerk だけで、公開鍵を知っていても証明書は偽造できません。だから公開してよいのです。今回は秘密の値を使わないので、Cloudflare に何かを登録する必要もありません。</p>
+
+<h2 id="prep">2. 準備</h2>
+<p>ログインの処理は Clerk のサーバーが行います。Clerk への登録（アプリケーション）は<strong>講師が済ませてあります</strong>。登録すると発行される鍵のうち、次の2つを講師から受け取ってください。</p>
+<ul>
+  <li><strong>Publishable key</strong>（<code>pk_test_</code> で始まる文字列）</li>
+  <li><strong>JWKS Public Key</strong>（<code>-----BEGIN PUBLIC KEY-----</code> で始まる文字列）</li>
+</ul>
+<div class="tbd">
+  <p><b>【未定】鍵の受け取り方と、ログインの方法（Google アカウント、またはメールに届くコード）は、お題を出すときに講師から伝えます。</b></p>
+</div>
+<p class="note">どちらも公開してよい値なので、コードの中に書いて commit して構いません。本編の「秘密の値を渡さない」には当たりません。</p>
+
+<h2 id="impl">3. 導入する</h2>
+<p>3つのプロンプトを順に Claude Code に送ります。1つ終わるごとに、内容を確かめてから次へ進みます。</p>
+
+<h3 id="impl1">① spec.md を直す</h3>
+<div class="blk-label prompt">Claude Code に送る</div>
+<pre><code>ログインを、メールアドレスを入力するだけの簡易ログインから、Clerk を使った本物のログインに変えたい。
+まず spec.md の「機能」「ルール」「画面」をどう直すかの案を見せて。
+- ログインは Clerk のサインイン画面で行う。ログインしていない人はツールを使えない
+- 本人は、Clerk のユーザー ID で決める（メールアドレスでは決めない）
+- 今あるデータはダミーなので、消してよい
+私たちが OK と言ったら spec.md を直して。実装はまだしないで。</code></pre>
+
+<h3 id="impl2">② 画面に Clerk を入れる</h3>
+<div class="blk-label prompt">Claude Code に送る</div>
+<pre><code>spec.md に合わせて、frontend/ に Clerk を入れて。
+- React 用の Clerk の部品（@clerk/clerk-react）を使う
+- Publishable key は次の値。公開してよい値なので、frontend/src/ の設定用のファイルに定数として書く
+  &lt;講師から受け取った Publishable key&gt;
+- 今のメールアドレスを入力するログインを、Clerk のサインインに置き換える
+- ログインしていないときは、Clerk のサインイン画面を出す
+- 画面の右上などに、ログイン中のユーザーとサインアウトのボタンを出す
+- API を呼ぶときは、Clerk のセッショントークンを Authorization ヘッダ（Bearer）に付ける。x-user-email は送らない</code></pre>
+
+<h3 id="impl3">③ API で証明書を確かめる</h3>
+<div class="blk-label prompt">Claude Code に送る</div>
+<pre><code>backend/ の API で、x-user-email を本人とみなすのをやめて、Clerk のセッショントークンを確かめて本人を決めるようにして。
+- Authorization ヘッダのトークンを、次の公開鍵（JWKS Public Key）で検証する。Secret key は使わない
+  &lt;講師から受け取った JWKS Public Key&gt;
+- 公開鍵は公開してよい値なので、backend/src/ の設定用のファイルに定数として書く
+- 署名、有効期限（exp と nbf）、どのサイトから来たか（azp）を確かめる。azp で許可するのは、次の2つ
+  http://localhost:8787
+  &lt;自分たちの班の公開 URL&gt;
+- 確かめられないときは 401 を返す
+- 本人の識別には、トークンの sub（Clerk のユーザー ID）を使う。テーブルの変更が要るなら backend/migrations/ に足す
+- wrangler.jsonc、scripts/、package.json の scripts は変更しない
+
+実装が終わったら、次の2つを報告して。
+1. トークンを付けずに API を呼ぶと 401 になること
+2. x-user-email に他人のメールアドレスを入れて API を呼んでも、なりすませないこと</code></pre>
+<p>終わったら、本編の [4] と同じく、リポジトリ直下で1行ずつ実行して手元で確かめます。テーブルを変えたときは、<code>npm run db:migrate:local</code> も忘れずに実行します。</p>
+<div class="blk-label term">ターミナルで実行</div>
+<pre class="term"><code>npm install
+npm run db:migrate:local
+npm run build
+npm run dev</code></pre>
+
+<h2 id="check">4. 確かめる</h2>
+<p><strong>手元で</strong>（<code>http://localhost:8787</code>）</p>
+<ul>
+  <li>ログインしていないと、Clerk のサインイン画面が出て、ツールが使えない</li>
+  <li>ログインすると、今までどおり ①〜④ が一通りできる</li>
+  <li>別のアカウントでログインし直すと、「自分のデータ」が切り替わる</li>
+  <li>DevTools の Network タブで、<code>/api/...</code> のリクエストに <code>Authorization</code> ヘッダが付いている</li>
+</ul>
+<p><strong>公開先で</strong></p>
+<ul>
+  <li>main に push して数分待ち、公開した URL でも同じようにログインして使える</li>
+</ul>
+<p>確かめられたら commit して、main に push します。</p>
+
+<h2 id="trouble">5. 困ったとき</h2>
+<ul>
+  <li><strong>画面に「Development mode」などの表示が出る</strong> → 開発用の設定で動いているための表示です。問題ありません。</li>
+  <li><strong>手元ではログインできるのに、公開した URL ではログインできない</strong> → 公開した URL を Clerk 側で許可する設定が要ります。講師に伝えてください。</li>
+  <li><strong>ログインしているのに API が 401 を返す</strong> → 画面が API にトークンを付けていないか、azp で許可するサイトが合っていない可能性があります。エラーと「何をしたら何が起きたか」を Claude Code に貼って相談してください。</li>
+  <li><strong>鍵を貼り間違えた</strong> → Publishable key は画面、公開鍵は API です。逆になっていないか確かめてください。</li>
+</ul>
+
+<h3 class="done" id="done">✅ 完了の定義</h3>
+<ol>
+  <li>ログインしないとツールが使えず、Clerk のサインイン画面が出る</li>
+  <li>トークンを付けずに API を呼ぶと 401 になり、他人のメールアドレスを送ってもなりすませない</li>
+  <li>公開した URL でも、ログインしてツールが使える</li>
+</ol>
+
+<p class="foot">Webツール開発ワークショップ　講師からのお題</p>
+</article></div>
+<script>
+// スクロールに合わせて、目次の「今読んでいる節」を色付けする
+(function () {
+  var links = [].slice.call(document.querySelectorAll('#toc a'));
+  var targets = links.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); });
+  function update() {
+    var y = window.scrollY + 120, cur = 0;
+    targets.forEach(function (t, i) { if (t && t.getBoundingClientRect().top + window.scrollY <= y) cur = i; });
+    links.forEach(function (a, i) { a.classList.toggle('cur', i === cur); });
+    if (links[cur].scrollIntoViewIfNeeded) links[cur].scrollIntoViewIfNeeded(false);
+  }
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('hashchange', update);
+  update();
+})();
+</script>
+<script>
+// 黒い枠の右上の「コピー」ボタンと、題材カードの「カードの中身をコピー」ボタン
+(function () {
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+    return ok ? Promise.resolve() : Promise.reject();
+  }
+  function copy(text) {
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text).catch(function () { return fallbackCopy(text); });
+    return fallbackCopy(text);
+  }
+  // ボタンを押したら getText() の結果をコピーし、結果を少しの間ボタンに表示する
+  function bindCopy(btn, label, getText) {
+    btn.addEventListener('click', function () {
+      copy(getText()).then(function () {
+        btn.textContent = 'コピーしました'; btn.classList.add('done');
+      }, function () {
+        btn.textContent = 'コピーできませんでした';
+      }).then(function () {
+        setTimeout(function () { btn.textContent = label; btn.classList.remove('done'); }, 1600);
+      });
+    });
+  }
+
+  document.querySelectorAll('pre').forEach(function (pre) {
+    var code = pre.querySelector('code') || pre;
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'copy-btn'; btn.textContent = 'コピー';
+    btn.setAttribute('aria-label', 'この枠の内容をコピー');
+    bindCopy(btn, 'コピー', function () { return code.innerText.replace(/\n$/, ''); });
+    pre.appendChild(btn);
+  });
+
+  // 題材カードを、壁打ちのプロンプトに貼る形の文字にする（機能の例のヒントは含めない）
+  function cardText(card) {
+    var lines = ['【題材】' + card.querySelector('summary').textContent.trim()];
+    card.querySelectorAll(':scope > dl > dt').forEach(function (dt) {
+      var label = dt.textContent.replace(/（.*?）/g, '').trim();
+      var dd = dt.nextElementSibling;
+      var items = dd.querySelectorAll('li');
+      if (items.length) {
+        lines.push('【' + label + '】');
+        items.forEach(function (li) { lines.push('- ' + li.textContent.trim()); });
+      } else {
+        lines.push('【' + label + '】' + dd.textContent.trim());
+      }
+    });
+    return lines.join('\n');
+  }
+  document.querySelectorAll('details.card').forEach(function (card) {
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'card-copy'; btn.textContent = 'カードの中身をコピー';
+    bindCopy(btn, 'カードの中身をコピー', function () { return cardText(card); });
+    card.querySelector(':scope > dl').after(btn);
+  });
+})();
+</script>
+</body></html>
