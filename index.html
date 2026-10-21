@@ -179,7 +179,7 @@ body.slide-mode{overflow:hidden;}
   <a class="sub" href="#s3">[3] フロント実装</a>
   <a class="sub" href="#s4">[4] バックエンドと結合</a>
   <a class="sub" href="#s5">[5] 班の中で確認</a>
-  <a class="sub" href="#s6">[6] 公開する</a>
+  <a class="sub" href="#s6">[6] 公開を確かめる</a>
   <a class="sub" href="#review">[7] 別の班に使ってもらう</a>
   <a class="sub" href="#extra">[8] 意見を反映する</a>
 </nav>
@@ -214,8 +214,8 @@ body.slide-mode{overflow:hidden;}
 
 <h3 id="setup">事前準備</h3>
 <ul>
-  <li><strong>アカウント</strong>：Claude（Pro 以上）、GitHub（講師の Organization への招待を受けておく）。Cloudflare（無料）は<strong>班の代表者1人だけ</strong>必要です（[6] で使います）</li>
-  <li><strong>ツール</strong>：Claude Code、Node.js 24 以上、git。Cloudflare の CLI（wrangler）はリポジトリの <code>backend/</code> に入っているので、別にインストールしなくてよい</li>
+  <li><strong>アカウント</strong>：Claude（Pro 以上）。班のリポジトリと公開の準備（GitHub・Cloudflare）は講師が済ませているので、自分で用意する必要はありません</li>
+  <li><strong>ツール</strong>：Claude Code、Node.js 24 以上、git。Cloudflare の CLI（wrangler）はリポジトリに入っているので、別にインストールしなくてよい</li>
 </ul>
 <h4 id="repo">リポジトリのフォルダに移動する</h4>
 <p>作業に使うリポジトリは、講師があらかじめパソコンに用意しています。</p>
@@ -234,17 +234,18 @@ body.slide-mode{overflow:hidden;}
 <p>リポジトリには、講師が次のファイルを入れてあります。<strong>自分で作る必要はありません。</strong>中身と意味だけ確認してください。</p>
 <div class="blk-label ref">参考（実行しない）</div>
 <pre><code>リポジトリ直下/
-├── .github/workflows/deploy.yml  ← 自動で公開する仕組み（[6]）
-├── .claude/settings.json         ← ① Claude Code にさせない操作の設定
-├── .npmrc                        ← ② 怪しいパッケージを入れない設定
-├── .gitignore                    ← commit しないファイルの一覧
-├── CLAUDE.md                     ← Claude Code への注意書き（触らないファイルとその理由）
-└── backend/                      ← バックエンドの雛形（[4] でここに API を書く）
-    ├── wrangler.jsonc            ← 公開先と DB の設定
-    ├── package.json
-    ├── src/index.ts
-    └── migrations/               ← 空。[4] でテーブル定義を足す</code></pre>
-<p class="warn"><code>.github/</code>、<code>.claude/</code>、<code>backend/wrangler.jsonc</code>、<code>backend/package.json</code> の scripts は講師が管理しています。<strong>変更しないでください。</strong>変更すると公開が壊れます。Claude Code にも編集させないよう、①で設定してあります。</p>
+├── package.json        ← 動かすためのコマンド（dev / build / db:migrate:local など）
+├── wrangler.jsonc      ← 公開先と DB の設定
+├── scripts/            ← 画面をビルドする仕組み
+├── placeholder/        ← 画面ができる前に表示する「準備中」のページ
+├── .claude/settings.json ← ① Claude Code にさせない操作の設定
+├── .npmrc              ← ② 怪しいパッケージを入れない設定
+├── .gitignore          ← commit しないファイルの一覧
+├── CLAUDE.md           ← Claude Code への注意書き（触らないファイルとその理由）
+└── backend/            ← API の雛形（[4] でここに書く）
+    ├── src/index.ts    ← API。動作確認用の /api/health だけ入っている
+    └── migrations/     ← 空。[4] でテーブル定義を足す</code></pre>
+<p class="warn"><code>wrangler.jsonc</code>、<code>scripts/</code>、<code>.claude/</code>、<code>package.json</code> の scripts は講師が管理しています。<strong>変更しないでください。</strong>変更すると公開が壊れます。Claude Code にも編集させないよう、①で設定してあります。</p>
 
 <p><strong>① <code>.claude/settings.json</code></strong>：秘密情報を Claude Code に読ませない設定と、講師のファイルを編集させない設定</p>
 <div class="blk-label ref">参考（実行しない）：.claude/settings.json</div>
@@ -255,9 +256,9 @@ body.slide-mode{overflow:hidden;}
       "Read(./**/.env)",
       "Read(./**/.env.*)",
       "Read(./secrets/**)",
-      "Edit(./.github/**)",
-      "Edit(./.claude/**)",
-      "Edit(./backend/wrangler.jsonc)"
+      "Edit(./wrangler.jsonc)",
+      "Edit(./scripts/**)",
+      "Edit(./.claude/**)"
     ]
   }
 }</code></pre>
@@ -267,7 +268,7 @@ body.slide-mode{overflow:hidden;}
   <li><code>Read(./**/.dev.vars)</code>：どのフォルダにある <code>.dev.vars</code> も読ませない。<code>**</code> は「すべてのフォルダ」という意味です。<code>.dev.vars</code> は Cloudflare Workers で、手元で動かすときのパスワードや API キーを書くファイルです。</li>
   <li><code>Read(./**/.env)</code>、<code>Read(./**/.env.*)</code>：<code>.env</code> や <code>.env.local</code> なども読ませない。秘密情報を書く定番のファイルです。</li>
   <li><code>Read(./secrets/**)</code>：<code>secrets</code> フォルダの中身はすべて読ませない。</li>
-  <li><code>Edit(...)</code> の3行：自動で公開する仕組み、この設定ファイル自体、公開先の設定を、Claude Code に書き換えさせない。</li>
+  <li><code>Edit(...)</code> の3行：公開先の設定、画面をビルドする仕組み、この設定ファイル自体を、Claude Code に書き換えさせない。</li>
 </ul>
 <p>Claude Code が読んだ内容は、会話の一部として AI に送られます。秘密情報を誤って読ませないよう、最初に止めておきます。</p>
 </details>
@@ -285,7 +286,7 @@ audit=true</code></pre>
 <p class="note">ファイルの中身は、Claude Code に「<code>.claude/settings.json</code> を見せて」のように頼むと確認できます。</p>
 
 <h2 id="arch">1. 全体像（アーキテクチャ）</h2>
-<p>フロントと API を<strong>1つの Cloudflare Worker</strong>から配信します。そのためフロントは <code>/api/...</code> を相対パスで呼ぶだけで済みます。公開は、main に push すると GitHub Actions が自動で行います（[6]）。</p>
+<p>フロントと API を<strong>1つの Cloudflare Worker</strong>から配信します。そのためフロントは <code>/api/...</code> を相対パスで呼ぶだけで済みます。公開は、main に push すると Cloudflare が自動でビルドして行います（[6]）。</p>
 
 <svg class="arch" viewBox="0 0 860 250" role="img" aria-label="ブラウザから Cloudflare Worker（フロントの静的ファイルと Hono の API）を経由して D1 につながる構成図">
   <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#6b6453"/></marker></defs>
@@ -330,13 +331,13 @@ audit=true</code></pre>
 <p>完成したときのフォルダ構成は次のとおりです。</p>
 <div class="blk-label ref">参考（実行しない）</div>
 <pre><code>repo-root/
-├── .github/       # 講師：自動で公開する仕組み
-├── CLAUDE.md      # 講師：Claude Code への注意書き
 ├── spec.md        # [1] 壁打ちで決めた要件
 ├── design.zip     # [2] Claude Design から書き出したもの
-├── frontend/      # [3] 画面（React）
-└── backend/       # [4] API（Hono）+ D1 のマイグレーション。雛形は講師が用意
-    └── wrangler.jsonc   # 講師：frontend/dist もここから配信する設定</code></pre>
+├── frontend/      # [3] 画面（React）。ビルドすると frontend/dist に出る
+├── backend/       # [4] API（Hono）とテーブル定義。雛形は講師が用意
+├── package.json   # 講師：動かすためのコマンド
+├── wrangler.jsonc # 講師：frontend/dist の画面と API を、1つの Worker で配信する設定
+└── CLAUDE.md      # 講師：Claude Code への注意書き</code></pre>
 
 <h2 id="theme">2. 題材と共通の流れ</h2>
 <p>題材は次の7つから班で1つ選びます。どの題材も、次の<strong>共通の流れ</strong>で作ります。</p>
@@ -420,7 +421,7 @@ audit=true</code></pre>
 <tr><td><a href="#s3">[3]</a></td><td>フロントを実装する（モックデータで動かす）</td><td>60分</td></tr>
 <tr><td><a href="#s4">[4]</a></td><td>バックエンドを作り、フロントとつなぐ</td><td>75〜90分</td></tr>
 <tr><td><a href="#s5">[5]</a></td><td>班の中で動作確認とコードレビュー</td><td>20分</td></tr>
-<tr><td><a href="#s6">[6]</a></td><td>公開する（代表者が1回だけ準備する）</td><td>20分</td></tr>
+<tr><td><a href="#s6">[6]</a></td><td>公開されたことを確かめる</td><td>10分</td></tr>
 <tr><td><a href="#review">[7]</a></td><td><strong>別の班に使ってもらい、意見をもらう</strong>（相互レビュー）</td><td>30分</td></tr>
 <tr><td><a href="#extra">[8]</a></td><td>もらった意見を反映する（修正・機能追加）</td><td>残り時間</td></tr>
 </tbody></table></div>
@@ -428,7 +429,6 @@ audit=true</code></pre>
   <p><b>【未定】[2] 以降の進め方は、当日の環境に合わせて講師から指示します。</b></p>
   <ul>
     <li>Claude Design が使えない場合は、[2] を飛ばし、[3] で <code>spec.md</code> から直接画面を作ることがあります。</li>
-    <li>使う技術（[3] [4] のフロント・バックエンド）が変わることがあります。</li>
     <li>どの場合も <code>spec.md</code> はそのまま使えます。技術の話を書かないのはそのためです。</li>
   </ul>
 </div>
@@ -436,8 +436,8 @@ audit=true</code></pre>
 <h3 id="before">作業を始める前に</h3>
 <ul>
   <li><strong>こまめに commit する</strong>：手順が1つ終わるたびに commit してください。途中で壊れても、うまく動いていたところまで戻れます。リポジトリは講師が用意したものを使い、フォークはしません。ブランチで作業して、main にマージします。</li>
-  <li><strong>main に入れたものは公開される</strong>：[6] の準備が済んだあとは、main に push するたびに自動で公開されます。手元から deploy はしません。</li>
-  <li><strong>講師のファイルを変えない</strong>：<code>.github/</code>、<code>.claude/</code>、<code>backend/wrangler.jsonc</code>、<code>backend/package.json</code> の scripts は変更しないでください（<a href="#files">最初から入っているファイル</a>）。</li>
+  <li><strong>main に入れたものは公開される</strong>：main に push するたびに、自動で公開されます（画面を作る前は「準備中」のページ）。手元から deploy はしません。</li>
+  <li><strong>講師のファイルを変えない</strong>：<code>wrangler.jsonc</code>、<code>scripts/</code>、<code>.claude/</code>、<code>package.json</code> の scripts は変更しないでください（<a href="#files">最初から入っているファイル</a>）。</li>
   <li><strong>秘密の値を渡さない</strong>：パスワードや API キーなどの秘密の値は、commit しないでください。Claude Code のチャットにも貼らないでください。秘密の値は <code>backend/.dev.vars</code> に書き、Claude Code には名前だけを伝えます（事前準備の設定で、Claude Code は <code>.dev.vars</code> を読めないようにしてあります）。</li>
   <li><strong>困ったら Claude Code に相談する</strong>：エラーが出たり、思ったとおりに動かなかったりしたら、エラーメッセージと「何をしたら、何が起きたか」をそのまま Claude Code に貼って、相談しながら進めてください。公開に失敗したときは、GitHub の Actions タブで失敗した実行を開き、ログのエラーの部分を貼ります。</li>
 </ul>
@@ -555,17 +555,17 @@ design.zip を展開して、デザインにある画面と機能を実装して
 <ol>
   <li>ターミナルで <code>cd frontend &amp;&amp; npm run dev</code> を実行し、表示された URL をブラウザで開く。</li>
   <li>①〜④を実際に操作し、気になる点を Claude Code に伝えて直す。</li>
-  <li>ここで一度 commit する。</li>
+  <li>ここで一度 commit する。main に push すると、作りかけの画面も公開されます。</li>
 </ol>
 
 <h3 id="s4">[4] バックエンドを作り、フロントとつなぐ</h3>
 <p>まず API を作ります。</p>
 <div class="blk-label prompt">Claude Code に送る</div>
-<pre><code>backend/ の雛形（Hono + Cloudflare Workers + TypeScript）に API を実装して。
+<pre><code>backend/ の雛形（Hono + Cloudflare Workers + TypeScript）に API を実装して。API は backend/src/ に書く。
 - frontend/ のコードを読んで、必要なテーブルと API（/api/...）を考えて実装する
 - テーブル定義は backend/migrations/ に SQL で足す。DB は雛形で設定済みの D1（バインディング名 DB）を使う
 - ログインは簡易版でよい。リクエストヘッダ x-user-email のメールアドレスを本人とみなす
-- backend/wrangler.jsonc、backend/package.json の scripts、.github/ は変更しない
+- wrangler.jsonc、scripts/、package.json の scripts は変更しない
 
 依頼者からの最初の条件は次のとおり。
 &lt;題材カードの「依頼者からの条件」をそのまま貼る&gt;
@@ -582,12 +582,13 @@ design.zip を展開して、デザインにある画面と機能を実装して
 <p>次に、フロントと API をつなぎます。フロントのビルド結果を Worker から配信する設定は、雛形に入っています。</p>
 <div class="blk-label prompt">Claude Code に送る</div>
 <pre><code>frontend/ のモックを backend/ の /api/... 呼び出しに置き換えて。</code></pre>
-<p>ローカルの DB にテーブルを作ってから起動します。<strong>Claude Code ではなく、自分のターミナルで</strong>リポジトリ直下から1行ずつ実行してください。</p>
+<p>手元の DB にテーブルを作り、画面をビルドしてから起動します。<strong>Claude Code ではなく、自分のターミナルで</strong>、リポジトリ直下で1行ずつ実行してください。</p>
 <div class="blk-label term">ターミナルで実行</div>
-<pre class="term"><code>cd backend
-npx wrangler d1 migrations apply DB --local
-npm run build:front &amp;&amp; npm run dev</code></pre>
-<p class="note"><code>DB</code> は、データベースの名前ではなく <code>wrangler.jsonc</code> のバインディング名です。雛形でバインディング名を <code>DB</code> にしてあるので、そのまま実行できます。<code>npm run dev</code> は起動したまま動き続けます。止めるときは <code>Ctrl + C</code> を押します。</p>
+<pre class="term"><code>npm install
+npm run db:migrate:local
+npm run build
+npm run dev</code></pre>
+<p class="note"><code>npm run dev</code> のあと、<code>http://localhost:8787</code> をブラウザで開きます。<code>npm run dev</code> は起動したまま動き続けます。止めるときは <code>Ctrl + C</code> を押します。画面を直したら、止めてから <code>npm run build</code> と <code>npm run dev</code> をやり直します。</p>
 <p class="note">フロントのチェックは利用者の入力ミスを防ぐため、API のチェックはルールを確実に守るためのものです。<strong>フロントのチェックだけでは、API を直接呼ばれたら素通りしてしまいます。</strong>画面から操作する限りは正常に見えるので、抜けていても気づけません。そのため、API に直接リクエストを送る確認まで Claude Code にやらせています。</p>
 
 <h3 id="s5">[5] 班の中で動作確認とコードレビュー</h3>
@@ -600,15 +601,12 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
 </ul>
 <p>確認できたら Claude Code で <code>/code-review</code> と <code>/security-review</code> を実行します。指摘は自分たちで読んで、直すかどうかを判断してください（<code>--fix</code> は付けない）。直し終わったら commit します。</p>
 
-<h3 id="s6">[6] 公開する（代表者が1回だけ準備する）</h3>
-<p>[5] まで終わったら、班の代表者が公開の準備をします。準備は1回だけで、そのあとは <strong>main に push するたびに、GitHub Actions が自動で公開</strong>します。公開先は代表者の Cloudflare アカウントです。代表者の画面を、班のみんなで一緒に見ながら進めてください。</p>
+<h3 id="s6">[6] 公開を確かめる</h3>
+<p>公開の準備は講師が済ませています。<strong>main に push すると、Cloudflare が自動でビルドして公開</strong>します。ここでは、[5] まで終わった状態が公開されているかを確かめます。</p>
 <ol>
-  <li>代表者が Cloudflare にログインし、Workers &amp; Pages で workers.dev のサブドメイン（「Your subdomain」）を <code>cl-intern2026winter-team-&lt;班の記号&gt;</code> にする（A班なら <code>cl-intern2026winter-team-a</code>）。</li>
-  <li>API トークンを作る。Manage account → Account API tokens → Create Token で、テンプレート「Edit Cloudflare Workers」を選び、Account の D1 Edit を足す。対象は自分のアカウント、期限はワークショップの最終日にする。</li>
-  <li>Account ID をコピーする。ダッシュボードで <code>Ctrl + K</code> を押し、「Copy account ID」を選ぶ。</li>
-  <li>班のリポジトリの Settings → Secrets and variables → Actions に、次の2つを登録する。<code>CLOUDFLARE_API_TOKEN</code>（2のトークン）、<code>CLOUDFLARE_ACCOUNT_ID</code>（3の ID）。</li>
-  <li>GitHub の Actions タブ → Deploy → Run workflow で実行する。成功したら、ログに出る URL を開く。URL の後ろ半分が、1で決めたサブドメインになっているか確かめる。</li>
-  <li>デプロイできたかの確認として、URL を QR コードにして、スマートフォンでも開いてみる。PC と違うネットワーク（モバイル回線）からも開ければ、公開できています。</li>
+  <li>[5] までの変更を main に push する。</li>
+  <li>数分待ってから、講師から伝えられた班の URL（<code>https://&lt;班の名前&gt;.&lt;…&gt;.workers.dev</code>）を開く。手元と同じように動けば公開できています。</li>
+  <li>URL を QR コードにして、スマートフォンでも開いてみる。PC と違うネットワーク（モバイル回線）からも開ければ、公開できています。</li>
 </ol>
 <details class="spec"><summary>URL を QR コードにする方法を見る</summary>
 <p><strong>Edge の場合</strong>（Windows に最初から入っているブラウザ）</p>
@@ -624,7 +622,7 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
 <p>表示された QR コードに、スマートフォンの標準のカメラアプリを向けると、画面にリンクが出ます。それを押して開きます。</p>
 <p class="note">メニューの名前や場所は、ブラウザの版によって少し違うことがあります。見つからなければ、右クリックのメニューや「︙」のメニューの中を探してください。</p>
 </details>
-<p class="note">トークンは、代表者のアカウントを操作できる鍵です。Secrets に登録するだけにして、Claude Code のチャットや Slack には貼らないでください。</p>
+<p class="note">数分たっても画面が変わらないときや、エラーの画面が出るときは、講師に伝えてください。</p>
 <p class="warn"><strong>公開した画面は、URL を知っていれば誰でも開いて書き込めます。</strong>次を守ってください。<br>・実在の個人情報や業務のデータは入れず、ダミーのデータだけを使う<br>・ログインには <code>taro@example.com</code> のようなダミーのメールアドレスを使う（一覧に表示されて、誰にでも見えるため）<br>・公開は発表までにとどめる。終わったら、講師の案内に従って片付ける</p>
 
 <h3 id="review">[7] 別の班に使ってもらい、意見をもらう（相互レビュー）</h3>
@@ -775,7 +773,8 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
 ├── design.zip     <i>[2] Claude Design から書き出したデザイン</i>
 ├── frontend/      <i>[3] 画面（React）</i>
 ├── backend/       <i>[4] API とテーブル定義。雛形は講師が用意</i>
-├── <b>.github/</b>       <i>講師：自動で公開する仕組み</i>
+├── <b>package.json</b>   <i>講師：動かすためのコマンド</i>
+├── <b>wrangler.jsonc</b> <i>講師：公開先と DB の設定</i>
 ├── <b>.claude/</b>       <i>講師：Claude Code にさせない操作の設定</i>
 └── <b>CLAUDE.md</b>      <i>講師：Claude Code への注意書き</i></div>
   <p>手順が進むごとに、上から順にファイルが増えていく。<strong>講師のファイル（色付き）は変えない</strong></p>
@@ -848,7 +847,7 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
       <tr><td>[3]</td><td>フロントを作る（まずはモックデータ）</td><td>60分</td></tr>
       <tr><td>[4]</td><td>API とデータベースを作り、つなぐ</td><td>75〜90分</td></tr>
       <tr><td>[5]</td><td>班の中で動作確認とコードレビュー</td><td>20分</td></tr>
-      <tr><td>[6]</td><td>公開する</td><td>20分</td></tr>
+      <tr><td>[6]</td><td>公開されたことを確かめる</td><td>10分</td></tr>
       <tr><td>[7]</td><td><strong>別の班に使ってもらう</strong></td><td>30分</td></tr>
       <tr><td>[8]</td><td>もらった意見を反映する</td><td>残り</td></tr>
     </tbody>
@@ -962,10 +961,10 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
 </section>
 
 <section class="slide">
-  <div class="kicker">[6] 公開する（20分）</div>
+  <div class="kicker">[6] 公開を確かめる（10分）</div>
   <h2>インターネットから使えるようにする</h2>
   <ul>
-    <li><strong>main に push すると、自動で公開</strong>される仕組みを、講師が用意している</li>
+    <li><strong>main に push するだけで、自動で公開</strong>される（準備は講師が済ませている）</li>
     <li>公開されると、<strong>URL を開けば誰でも使える</strong>状態になる</li>
     <li>スマートフォンでも開いて、本当に公開できたか確かめる</li>
     <li>誰でも見られるので、<strong>ダミーのデータだけ</strong>を使う</li>
@@ -1005,7 +1004,7 @@ npm run build:front &amp;&amp; npm run dev</code></pre>
   <ul>
     <li><strong>こまめに commit</strong>：手順が1つ終わるたびに。ブランチで作業して main にマージ</li>
     <li><strong>秘密の値を渡さない</strong>：commit しない、Claude Code のチャットにも貼らない</li>
-    <li><strong>講師のファイルを変えない</strong>：.github/、.claude/、backend/wrangler.jsonc など</li>
+    <li><strong>講師のファイルを変えない</strong>：wrangler.jsonc、scripts/、.claude/ など</li>
     <li><strong>公開した画面にはダミーのデータだけ</strong>：ログインは taro@example.com のようなダミーで</li>
     <li><strong>困ったら Claude Code に相談</strong>：エラーと「何をしたら何が起きたか」を貼る</li>
   </ul>
