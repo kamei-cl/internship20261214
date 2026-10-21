@@ -158,7 +158,7 @@ p.tier{margin:1.8em 0 .4em; font-size:.85rem; font-weight:700; color:#a3661b; le
 <thead><tr><th>手順</th><th>やること</th><th>目安</th></tr></thead>
 <tbody>
 <tr><td><a href="#clerk">1</a></td><td>Clerk の仕組みを知る（この資料を読む）</td><td>10分</td></tr>
-<tr><td><a href="#prep">2</a></td><td>講師から鍵を受け取る</td><td>5分</td></tr>
+<tr><td><a href="#prep">2</a></td><td>鍵とログインの方法を確かめる</td><td>5分</td></tr>
 <tr><td><a href="#impl">3</a></td><td>Claude Code で導入する</td><td>30〜40分</td></tr>
 <tr><td><a href="#check">4</a></td><td>手元と公開先で確かめる</td><td>15分</td></tr>
 </tbody></table></div>
@@ -204,15 +204,21 @@ p.tier{margin:1.8em 0 .4em; font-size:.85rem; font-weight:700; color:#a3661b; le
 <p class="note">公開鍵は「鍵を開ける」ためではなく、「署名が本物か確かめる」ための鍵です。署名を作れるのは Clerk だけで、公開鍵を知っていても証明書は偽造できません。だから公開してよいのです。今回は秘密の値を使わないので、Cloudflare に何かを登録する必要もありません。</p>
 
 <h2 id="prep">2. 準備</h2>
-<p>ログインの処理は Clerk のサーバーが行います。Clerk への登録（アプリケーション）は<strong>講師が済ませてあります</strong>。登録すると発行される鍵のうち、次の2つを講師から受け取ってください。</p>
+<p>ログインの処理は Clerk のサーバーが行います。Clerk への登録（アプリケーション）は<strong>講師が済ませてあります</strong>。登録すると発行される鍵のうち、使う2つは、講師が<strong>リポジトリ直下の <code>clerk-keys.md</code></strong> に入れてあります。自分で貼り付ける必要はありません。</p>
 <ul>
-  <li><strong>Publishable key</strong>（<code>pk_test_</code> で始まる文字列）</li>
-  <li><strong>JWKS Public Key</strong>（<code>-----BEGIN PUBLIC KEY-----</code> で始まる文字列）</li>
+  <li><strong>Publishable key</strong>（<code>pk_test_</code> で始まる1行）</li>
+  <li><strong>JWKS Public Key</strong>（<code>-----BEGIN PUBLIC KEY-----</code> で始まる複数行）</li>
 </ul>
-<div class="tbd">
-  <p><b>【未定】鍵の受け取り方と、ログインの方法（Google アカウント、または登録したメールアドレスに Clerk から届く確認コード）は、お題を出すときに講師から伝えます。</b></p>
-</div>
+<p>中身は、Claude Code に「<code>clerk-keys.md</code> を見せて」と頼むと確かめられます。</p>
 <p class="note">どちらも公開してよい値なので、コードの中に書いて commit して構いません。本編の「秘密の値を渡さない」には当たりません。</p>
+
+<h3>ログインの方法</h3>
+<p>ログインには、<strong>ユーザー名とパスワード</strong>を使います。メールアドレスは要りません。初めてのときは、サインイン画面の「Sign up」から登録します。</p>
+<ul>
+  <li>ユーザー名：英数字で4文字以上（数字だけは使えない）</li>
+  <li>パスワード：8文字以上。よく使われるパスワード（<code>password123</code> など）は使えない</li>
+</ul>
+<p class="note">「別のアカウントでログインし直す」確認（4. 確かめる）のために、ユーザーを2つ作っておくと便利です。</p>
 
 <h2 id="impl">3. 導入する</h2>
 <p>3つのプロンプトを順に Claude Code に送ります。1つ終わるごとに、内容を確かめてから次へ進みます。</p>
@@ -230,8 +236,7 @@ p.tier{margin:1.8em 0 .4em; font-size:.85rem; font-weight:700; color:#a3661b; le
 <div class="blk-label prompt">Claude Code に送る</div>
 <pre><code>spec.md に合わせて、frontend/ に Clerk を入れて。
 - React 用の Clerk の部品（@clerk/clerk-react）を使う
-- Publishable key は次の値。公開してよい値なので、frontend/src/ の設定用のファイルに定数として書く
-  &lt;講師から受け取った Publishable key&gt;
+- Publishable key は、リポジトリ直下の clerk-keys.md に書いてある値を使う。公開してよい値なので、frontend/src/ の設定用のファイルに定数として書く
 - 今のメールアドレスを入力するログインを、Clerk のサインインに置き換える
 - ログインしていないときは、Clerk のサインイン画面を出す
 - 画面の右上などに、ログイン中のユーザーとサインアウトのボタンを出す
@@ -240,8 +245,7 @@ p.tier{margin:1.8em 0 .4em; font-size:.85rem; font-weight:700; color:#a3661b; le
 <h3 id="impl3">③ API で証明書を確かめる</h3>
 <div class="blk-label prompt">Claude Code に送る</div>
 <pre><code>backend/ の API で、x-user-email を本人とみなすのをやめて、Clerk のセッショントークンを確かめて本人を決めるようにして。
-- Authorization ヘッダのトークンを、次の公開鍵（JWKS Public Key）で検証する。Secret key は使わない
-  &lt;講師から受け取った JWKS Public Key&gt;
+- Authorization ヘッダのトークンを、リポジトリ直下の clerk-keys.md に書いてある公開鍵（JWKS Public Key）で検証する。Secret key は使わない
 - 公開鍵は公開してよい値なので、backend/src/ の設定用のファイルに定数として書く
 - 署名、有効期限（exp と nbf）、どのサイトから来たか（azp）を確かめる。azp で許可するのは、次の2つ
   http://localhost:8787
@@ -279,7 +283,7 @@ npm run dev</code></pre>
   <li><strong>画面に「Development mode」などの表示が出る</strong> → 開発用の設定で動いているための表示です。問題ありません。</li>
   <li><strong>手元ではログインできるのに、公開した URL ではログインできない</strong> → 公開した URL を Clerk 側で許可する設定が要ります。講師に伝えてください。</li>
   <li><strong>ログインしているのに API が 401 を返す</strong> → 画面が API にトークンを付けていないか、azp で許可するサイトが合っていない可能性があります。エラーと「何をしたら何が起きたか」を Claude Code に貼って相談してください。</li>
-  <li><strong>鍵を貼り間違えた</strong> → Publishable key は画面、公開鍵は API です。逆になっていないか確かめてください。</li>
+  <li><strong>鍵が違うと言われる</strong> → <code>clerk-keys.md</code> の Publishable key は画面、公開鍵は API で使います。逆になっていないか、Claude Code に確かめてもらってください。</li>
 </ul>
 
 <h3 class="done" id="done">✅ 完了の定義</h3>
