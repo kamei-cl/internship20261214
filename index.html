@@ -192,7 +192,7 @@ body.slide-mode{overflow:hidden;}
 <h2 id="goal">0. この資料について</h2>
 <ul>
   <li><strong>説明</strong>：約1時間（この資料をざっと読む）</li>
-  <li><strong>作業</strong>：約3〜4時間（班で1つのツールを作る）</li>
+  <li><strong>作業</strong>：約4〜5時間（班で1つのツールを作る）。手順ごとの目安は余裕を持たせてあるので、早く進めば [8] に時間を使えます</li>
   <li><strong>前提</strong>：Claude Code の基本操作は Day1 で説明済み。必要な準備は下の「事前準備」を見てください。</li>
 </ul>
 <p class="key">この資料は<strong>作業中に横に置いて使う</strong>ものです。手順ごとにコピーして使えるプロンプトを置いてあります。<code>&lt; &gt;</code> の部分を自分の題材に書き換えて使ってください。</p>
@@ -225,7 +225,7 @@ body.slide-mode{overflow:hidden;}
     <li>フォルダの場所：<code>&lt;当日指示&gt;</code></li>
   </ul>
 </div>
-<p>ターミナルで次を実行し、そのフォルダに移動します。<code>&lt; &gt;</code> は上の値に置き換えてください。</p>
+<p>ターミナルを開きます。タスクバーの Windows のマーク（スタート）を押して「PowerShell」と入力し、出てきた「Windows PowerShell」を選ぶと開けます。開いたら次を実行し、そのフォルダに移動します。<code>&lt; &gt;</code> は記号ごと、上の値に置き換えてください。</p>
 <div class="blk-label term">ターミナルで実行</div>
 <pre class="term"><code>cd &lt;フォルダの場所&gt;</code></pre>
 <p class="note">ターミナルを開き直したときも、最初にこのコマンドで移動してください。このフォルダが、以降の説明でいう<strong>リポジトリ直下</strong>です。</p>
@@ -421,7 +421,7 @@ audit=true</code></pre>
 <tr><td><a href="#s3">[3]</a></td><td>フロントを実装する（モックデータで動かす）</td><td>60分</td></tr>
 <tr><td><a href="#s4">[4]</a></td><td>バックエンドを作り、フロントとつなぐ</td><td>75〜90分</td></tr>
 <tr><td><a href="#s5">[5]</a></td><td>班の中で動作確認とコードレビュー</td><td>20分</td></tr>
-<tr><td><a href="#s6">[6]</a></td><td>公開されたことを確かめる</td><td>10分</td></tr>
+<tr><td><a href="#s6">[6]</a></td><td>公開を確かめる</td><td>10分</td></tr>
 <tr><td><a href="#review">[7]</a></td><td><strong>別の班に使ってもらい、意見をもらう</strong>（相互レビュー）</td><td>30分</td></tr>
 <tr><td><a href="#extra">[8]</a></td><td>もらった意見を反映する（修正・機能追加）</td><td>残り時間</td></tr>
 </tbody></table></div>
@@ -435,11 +435,11 @@ audit=true</code></pre>
 
 <h3 id="before">作業を始める前に</h3>
 <ul>
-  <li><strong>こまめに commit する</strong>：手順が1つ終わるたびに commit してください。途中で壊れても、うまく動いていたところまで戻れます。リポジトリは講師が用意したものを使い、フォークはしません。ブランチで作業して、main にマージします。</li>
+  <li><strong>こまめに commit して push する</strong>：手順が1つ終わるたびに、main に commit して push してください。途中で壊れても、うまく動いていたところまで戻れます。Claude Code に「ここまでを commit して push して」と頼めば実行してくれます。リポジトリは講師が用意したものを使い、フォークやブランチは使いません。</li>
   <li><strong>main に入れたものは公開される</strong>：main に push するたびに、自動で公開されます（画面を作る前は「準備中」のページ）。手元から deploy はしません。</li>
   <li><strong>講師のファイルを変えない</strong>：<code>wrangler.jsonc</code>、<code>scripts/</code>、<code>.claude/</code>、<code>package.json</code> の scripts は変更しないでください（<a href="#files">最初から入っているファイル</a>）。</li>
   <li><strong>秘密の値を渡さない</strong>：パスワードや API キーなどの秘密の値は、commit しないでください。Claude Code のチャットにも貼らないでください。秘密の値は <code>backend/.dev.vars</code> に書き、Claude Code には名前だけを伝えます（事前準備の設定で、Claude Code は <code>.dev.vars</code> を読めないようにしてあります）。</li>
-  <li><strong>困ったら Claude Code に相談する</strong>：エラーが出たり、思ったとおりに動かなかったりしたら、エラーメッセージと「何をしたら、何が起きたか」をそのまま Claude Code に貼って、相談しながら進めてください。公開に失敗したときは、GitHub の Actions タブで失敗した実行を開き、ログのエラーの部分を貼ります。</li>
+  <li><strong>困ったら Claude Code に相談する</strong>：エラーが出たり、思ったとおりに動かなかったりしたら、エラーメッセージと「何をしたら、何が起きたか」をそのまま Claude Code に貼って、相談しながら進めてください。公開がうまくいかないとき（push しても画面が変わらない、エラーの画面が出る）は、講師に伝えてください。</li>
 </ul>
 
 <h3 id="s1">[1] 壁打ちで要件を決め、spec.md にまとめる</h3>
@@ -553,7 +553,7 @@ design.zip を展開して、デザインにある画面と機能を実装して
 ログインはメールアドレスだけを入力する簡易ログインにして、ログインするまで他の画面は見せないこと。
 この段階では API がないので、データはモックで表示して。</code></pre>
 <ol>
-  <li>ターミナルで <code>cd frontend &amp;&amp; npm run dev</code> を実行し、表示された URL をブラウザで開く。</li>
+  <li>ターミナルで <code>cd frontend</code> と <code>npm run dev</code> を1行ずつ実行し、表示された URL をブラウザで開く。確認が終わったら <code>Ctrl + C</code> で止め、<code>cd ..</code> でリポジトリ直下に戻る。</li>
   <li>①〜④を実際に操作し、気になる点を Claude Code に伝えて直す。</li>
   <li>ここで一度 commit する。main に push すると、作りかけの画面も公開されます。</li>
 </ol>
@@ -847,7 +847,7 @@ npm run dev</code></pre>
       <tr><td>[3]</td><td>フロントを作る（まずはモックデータ）</td><td>60分</td></tr>
       <tr><td>[4]</td><td>API とデータベースを作り、つなぐ</td><td>75〜90分</td></tr>
       <tr><td>[5]</td><td>班の中で動作確認とコードレビュー</td><td>20分</td></tr>
-      <tr><td>[6]</td><td>公開されたことを確かめる</td><td>10分</td></tr>
+      <tr><td>[6]</td><td>公開を確かめる</td><td>10分</td></tr>
       <tr><td>[7]</td><td><strong>別の班に使ってもらう</strong></td><td>30分</td></tr>
       <tr><td>[8]</td><td>もらった意見を反映する</td><td>残り</td></tr>
     </tbody>
@@ -1002,7 +1002,7 @@ npm run dev</code></pre>
 <section class="slide">
   <h2>作業中に守ること</h2>
   <ul>
-    <li><strong>こまめに commit</strong>：手順が1つ終わるたびに。ブランチで作業して main にマージ</li>
+    <li><strong>こまめに commit と push</strong>：手順が1つ終わるたびに、main へ。Claude Code に頼めばよい</li>
     <li><strong>秘密の値を渡さない</strong>：commit しない、Claude Code のチャットにも貼らない</li>
     <li><strong>講師のファイルを変えない</strong>：wrangler.jsonc、scripts/、.claude/ など</li>
     <li><strong>公開した画面にはダミーのデータだけ</strong>：ログインは taro@example.com のようなダミーで</li>
