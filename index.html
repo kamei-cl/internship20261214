@@ -171,7 +171,7 @@ body.slide-mode{overflow:hidden;}
   <div class="head">目次</div>
   <a href="#goal">0. この資料について</a>
   <a class="sub" href="#setup">事前準備</a>
-  <a class="sub" href="#repo">リポジトリのフォルダに移動</a>
+  <a class="sub" href="#repo">フォルダに移動・コンテナに入る</a>
   <a href="#arch">1. 全体像（アーキテクチャ）</a>
   <a href="#theme">2. 題材と共通の流れ</a>
   <a class="sub" href="#cards">題材カード</a>
@@ -220,9 +220,9 @@ body.slide-mode{overflow:hidden;}
 <h3 id="setup">事前準備</h3>
 <ul>
   <li><strong>アカウント</strong>：Claude（Pro 以上）。班のリポジトリと公開の準備（GitHub・Cloudflare）は講師が済ませているので、自分で用意する必要はありません</li>
-  <li><strong>ツール</strong>：Claude Code、Node.js 24 以上、git。Cloudflare の CLI（wrangler）はリポジトリに入っているので、別にインストールしなくてよい</li>
+  <li><strong>ツール</strong>：Docker Desktop（講師が用意済み）。Claude Code、Node.js、git は<strong>コンテナ</strong>（パソコンの中に用意された、作業用の小さな環境）の中に入っているので、パソコンに入れる必要はありません。Claude Code のログインも講師が済ませています</li>
 </ul>
-<h4 id="repo">リポジトリのフォルダに移動する</h4>
+<h4 id="repo">リポジトリのフォルダに移動し、コンテナに入る</h4>
 <p>作業に使うリポジトリは、講師があらかじめパソコンに用意しています。</p>
 <div class="tbd">
   <p><b>【未定】リポジトリの場所は当日講師から指示します。</b></p>
@@ -230,10 +230,17 @@ body.slide-mode{overflow:hidden;}
     <li>フォルダの場所：<code>&lt;当日指示&gt;</code></li>
   </ul>
 </div>
-<p>ターミナルを開きます。タスクバーの Windows のマーク（スタート）を押して「PowerShell」と入力し、出てきた「Windows PowerShell」を選ぶと開けます。開いたら次を実行し、そのフォルダに移動します。<code>&lt; &gt;</code> は記号ごと、上の値に置き換えてください。</p>
+<p>ターミナルを開きます。タスクバーの Windows のマーク（スタート）を押して「PowerShell」と入力し、出てきた「Windows PowerShell」を選ぶと開けます。開いたら次を1行ずつ実行し、そのフォルダに移動してコンテナに入ります。<code>&lt; &gt;</code> は記号ごと、上の値に置き換えてください。</p>
 <div class="blk-label term">ターミナルで実行</div>
-<pre class="term"><code>cd &lt;フォルダの場所&gt;</code></pre>
-<p class="note">ターミナルを開き直したときも、最初にこのコマンドで移動してください。このフォルダが、以降の説明でいう<strong>リポジトリ直下</strong>です。</p>
+<pre class="term"><code>cd &lt;フォルダの場所&gt;
+docker compose up -d
+docker compose exec app bash</code></pre>
+<p>表示が <code>node@…:/work$</code> に変われば、コンテナの中に入れています。<strong>以後の作業（Claude Code、npm のコマンド）は、すべてこのコンテナの中で行います。</strong>コンテナの中の <code>/work</code> が、以降の説明でいう<strong>リポジトリ直下</strong>です。</p>
+<ul>
+  <li>2つ目のターミナルが必要なとき（<code>npm run dev</code> を動かしたままにするときなど）は、PowerShell をもう1つ開き、<code>cd &lt;フォルダの場所&gt;</code> と <code>docker compose exec app bash</code> で同じコンテナに入ります。</li>
+  <li>終わるときは、コンテナの中で <code>exit</code> と打って出てから、<code>docker compose down</code> で止めます。ファイルはパソコン側のフォルダに残ります。</li>
+</ul>
+<p class="note">コンテナの中で作ったファイルは、パソコン側のフォルダにもそのまま出ます。メモ帳やエクスプローラーで開くときは、パソコン側のフォルダを開きます。</p>
 
 <h4 id="files">最初から入っているファイル</h4>
 <p>リポジトリには、講師が次のファイルを入れてあります。<strong>自分で作る必要はありません。</strong>中身と意味だけ確認してください。</p>
@@ -242,6 +249,7 @@ body.slide-mode{overflow:hidden;}
 ├── package.json        ← 動かすためのコマンド（dev / build / db:migrate:local など）
 ├── wrangler.jsonc      ← 公開先と DB の設定
 ├── scripts/            ← 画面をビルドする仕組み
+├── Dockerfile、compose.yaml ← コンテナ（手元の作業環境）の設定
 ├── placeholder/        ← 画面ができる前に表示する「準備中」のページ
 ├── .claude/settings.json ← ① Claude Code にさせない操作の設定
 ├── .npmrc              ← ② 怪しいパッケージを入れない設定
@@ -250,7 +258,7 @@ body.slide-mode{overflow:hidden;}
 └── backend/            ← API の雛形（[4] でここに書く）
     ├── src/index.ts    ← API。動作確認用の /api/health だけ入っている
     └── migrations/     ← 空。[4] でテーブル定義を足す</code></pre>
-<p class="warn"><code>wrangler.jsonc</code>、<code>scripts/</code>、<code>.claude/</code>、<code>package.json</code> の scripts は講師が管理しています。<strong>変更しないでください。</strong>変更すると公開が壊れます。Claude Code にも編集させないよう、①で設定してあります。</p>
+<p class="warn"><code>wrangler.jsonc</code>、<code>scripts/</code>、<code>.claude/</code> の設定ファイル、<code>Dockerfile</code>、<code>compose.yaml</code>、<code>package.json</code> の scripts は講師が管理しています。<strong>変更しないでください。</strong>変更すると公開や手元の環境が壊れます。<code>.claude/skills/</code> にスキルを作るのは構いません。</p>
 
 <p><strong>① <code>.claude/settings.json</code></strong>：秘密情報を Claude Code に読ませない設定と、講師のファイルを編集させない設定</p>
 <div class="blk-label ref">参考（実行しない）：.claude/settings.json</div>
@@ -263,7 +271,7 @@ body.slide-mode{overflow:hidden;}
       "Read(./secrets/**)",
       "Edit(./wrangler.jsonc)",
       "Edit(./scripts/**)",
-      "Edit(./.claude/**)"
+      "Edit(./.claude/*json)"
     ]
   }
 }</code></pre>
@@ -273,7 +281,7 @@ body.slide-mode{overflow:hidden;}
   <li><code>Read(./**/.dev.vars)</code>：どのフォルダにある <code>.dev.vars</code> も読ませない。<code>**</code> は「すべてのフォルダ」という意味です。<code>.dev.vars</code> は Cloudflare Workers で、手元で動かすときのパスワードや API キーを書くファイルです。</li>
   <li><code>Read(./**/.env)</code>、<code>Read(./**/.env.*)</code>：<code>.env</code> や <code>.env.local</code> なども読ませない。秘密情報を書く定番のファイルです。</li>
   <li><code>Read(./secrets/**)</code>：<code>secrets</code> フォルダの中身はすべて読ませない。</li>
-  <li><code>Edit(...)</code> の3行：公開先の設定、画面をビルドする仕組み、この設定ファイル自体を、Claude Code に書き換えさせない。</li>
+  <li><code>Edit(...)</code> の3行：公開先の設定、画面をビルドする仕組み、<code>.claude/</code> の中の設定ファイル（この <code>settings.json</code> など）を、Claude Code に書き換えさせない。<code>.claude/skills/</code> のスキルは作れる。</li>
 </ul>
 <p>Claude Code が読んだ内容は、会話の一部として AI に送られます。秘密情報を誤って読ませないよう、最初に止めておきます。</p>
 </details>
@@ -331,6 +339,7 @@ audit=true</code></pre>
 <tr><td>バックエンド</td><td>Hono（TypeScript）on Cloudflare Workers</td></tr>
 <tr><td>DB</td><td>Cloudflare D1（SQLite）。マイグレーションは <code>backend/migrations/</code></td></tr>
 <tr><td>CLI</td><td>wrangler、npm、git</td></tr>
+<tr><td>手元の環境</td><td>Docker（コンテナの中で作業する。パソコンに入れるのは Docker Desktop だけ）</td></tr>
 </tbody></table></div>
 
 <p>完成したときのフォルダ構成は次のとおりです。</p>
@@ -442,7 +451,7 @@ audit=true</code></pre>
 <ul>
   <li><strong>こまめに commit して push する</strong>：手順が1つ終わるたびに、main に commit して push してください。途中で壊れても、うまく動いていたところまで戻れます。Claude Code に「ここまでを commit して push して」と頼めば実行してくれます。リポジトリは講師が用意したものを使い、フォークやブランチは使いません。</li>
   <li><strong>main に入れたものは公開される</strong>：main に push するたびに、自動で公開されます（画面を作る前は「準備中」のページ）。手元から deploy はしません。</li>
-  <li><strong>講師のファイルを変えない</strong>：<code>wrangler.jsonc</code>、<code>scripts/</code>、<code>.claude/</code>、<code>package.json</code> の scripts は変更しないでください（<a href="#files">最初から入っているファイル</a>）。</li>
+  <li><strong>講師のファイルを変えない</strong>：<code>wrangler.jsonc</code>、<code>scripts/</code>、<code>.claude/</code> の設定ファイル、<code>Dockerfile</code>、<code>compose.yaml</code>、<code>package.json</code> の scripts は変更しないでください（<a href="#files">最初から入っているファイル</a>）。</li>
   <li><strong>秘密の値を渡さない</strong>：パスワードや API キーなどの秘密の値は、commit しないでください。Claude Code のチャットにも貼らないでください。秘密の値は <code>backend/.dev.vars</code> に書き、Claude Code には名前だけを伝えます（事前準備の設定で、Claude Code は <code>.dev.vars</code> を読めないようにしてあります）。</li>
   <li><strong>困ったら Claude Code に相談する</strong>：エラーが出たり、思ったとおりに動かなかったりしたら、エラーメッセージと「何をしたら、何が起きたか」をそのまま Claude Code に貼って、相談しながら進めてください。公開がうまくいかないとき（push しても画面が変わらない、エラーの画面が出る）は、講師に伝えてください。</li>
 </ul>
@@ -450,7 +459,7 @@ audit=true</code></pre>
 <h3 id="s1">[1] 壁打ちで要件を決め、spec.md にまとめる</h3>
 <p>いきなり画面を作らず、まず<strong>何を作るか</strong>を班で決めます。Claude Code に<strong>聞き役</strong>をしてもらい、質問に答えながら機能やルールを炙り出します。決めるのは自分たちで、AI は質問と整理を手伝うだけです。</p>
 <ol>
-  <li>リポジトリ直下（<a href="#repo">リポジトリのフォルダに移動する</a>で移動したフォルダ）で Claude Code を開く。</li>
+  <li><a href="#repo">コンテナに入った</a>ターミナルで <code>claude</code> と打ち、Claude Code を開く（ログインは講師が済ませています）。</li>
   <li>次のプロンプトをコピーして Claude Code の入力欄に貼る。</li>
   <li>自分の題材カードを開いて「カードの中身をコピー」を押し、プロンプトの <code>&lt; &gt;</code> の行と置き換えて送る。書き換えるのは<strong>この1か所だけ</strong>です。</li>
   <li>質問に1つずつ、班で相談して答える。迷ったら題材カードの「ヒント：機能の例」も見てよい。</li>
@@ -592,7 +601,7 @@ design.zip を展開して、デザインにある画面と機能を実装して
 ログインはメールアドレスだけを入力する簡易ログインにして、ログインするまで他の画面は見せないこと。
 この段階では API がないので、データはモックで表示して。</code></pre>
 <ol>
-  <li>ターミナルで <code>cd frontend</code> と <code>npm run dev</code> を1行ずつ実行し、表示された URL をブラウザで開く。確認が終わったら <code>Ctrl + C</code> で止め、<code>cd ..</code> でリポジトリ直下に戻る。</li>
+  <li>2つ目のターミナルでコンテナに入り、リポジトリ直下で <code>npm run build</code> と <code>npm run dev</code> を1行ずつ実行する。パソコンのブラウザで <code>http://localhost:8787</code> を開く。画面を直したら、<code>Ctrl + C</code> で止めて、<code>npm run build</code> と <code>npm run dev</code> をやり直す。</li>
   <li>①〜④を実際に操作し、気になる点を Claude Code に伝えて直す。</li>
   <li>ここで一度 commit する。main に push すると、作りかけの画面も公開されます。</li>
 </ol>
@@ -621,7 +630,7 @@ design.zip を展開して、デザインにある画面と機能を実装して
 <p>次に、フロントと API をつなぎます。フロントのビルド結果を Worker から配信する設定は、雛形に入っています。</p>
 <div class="blk-label prompt">Claude Code に送る</div>
 <pre><code>frontend/ のモックを backend/ の /api/... 呼び出しに置き換えて。</code></pre>
-<p>手元の DB にテーブルを作り、画面をビルドしてから起動します。<strong>Claude Code ではなく、自分のターミナルで</strong>、リポジトリ直下で1行ずつ実行してください。</p>
+<p>手元の DB にテーブルを作り、画面をビルドしてから起動します。<strong>Claude Code ではなく、2つ目のターミナル（コンテナの中）で</strong>、リポジトリ直下で1行ずつ実行してください。</p>
 <div class="blk-label term">ターミナルで実行</div>
 <pre class="term"><code>npm install
 npm run db:migrate:local
@@ -691,7 +700,7 @@ npm run dev</code></pre>
 - &lt;よかったところ&gt;
 ここまで</code></pre>
 <ol start="3">
-  <li>できた <code>feedback/review.md</code> を、メモ帳で開いた状態にしておく。リポジトリ直下で次のコマンドを実行すると開けます。</li>
+  <li>できた <code>feedback/review.md</code> を、メモ帳で開いた状態にしておく。<strong>コンテナの外</strong>（PowerShell で、コンテナに入っていないターミナル）で、リポジトリのフォルダに移動してから次のコマンドを実行すると開けます。</li>
 </ol>
 <div class="blk-label term">ターミナルで実行</div>
 <pre class="term"><code>notepad feedback\review.md</code></pre>
@@ -725,7 +734,7 @@ npm run dev</code></pre>
 - 結果は、項目ごとの ○／✕ の表で見せる。✕ があれば、何が期待と違ったかを1行で添える
 - コードは直さない。直すかどうかは私たちが決める
 作ったら、どう呼び出せばよいかを教えて。スキルはまだ使わないで。</code></pre>
-<p class="note">テストを流すときは、別のターミナルで <code>npm run dev</code> を動かしておきます（[4] と同じ手順）。</p>
+<p class="note">テストを流すときは、2つ目のターミナル（コンテナの中）で <code>npm run dev</code> を動かしておきます（[4] と同じ手順）。</p>
 </div>
 
 <ol>
@@ -819,6 +828,7 @@ npm run dev</code></pre>
     <tr><td>API</td><td>Hono（TypeScript）を Cloudflare Workers で動かす</td></tr>
     <tr><td>データベース</td><td>Cloudflare D1（SQLite）</td></tr>
     <tr><td>公開</td><td>main に push すると自動で公開（詳しくは資料の [6]）</td></tr>
+    <tr><td>手元の環境</td><td>Docker のコンテナの中で作業する（講師が用意済み）</td></tr>
   </tbody></table>
   <p class="muted">どれも AI が書き慣れている定番の組み合わせ。コードは Claude Code が書くので、名前を覚えなくても大丈夫</p>
 </section>
@@ -1073,7 +1083,7 @@ npm run dev</code></pre>
 <section class="slide title">
   <h2>はじめましょう</h2>
   <ol>
-    <li>資料の<strong>「事前準備」</strong>で、リポジトリのフォルダに移動する</li>
+    <li>資料の<strong>「事前準備」</strong>で、リポジトリのフォルダに移動し、コンテナに入る</li>
     <li><strong>題材カード</strong>を読んで、班で題材を1つ選ぶ</li>
     <li>資料の <strong>[1]</strong> のプロンプトで、壁打ちを始める</li>
   </ol>
