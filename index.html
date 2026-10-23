@@ -45,8 +45,10 @@ p.key{margin:1em 0; padding:.9em 1.2em; background:var(--warn-bg);
   border-left:5px solid var(--warn-bd); border-radius:0 8px 8px 0; color:#5c4a2e;}
 p.warn{margin:1em 0; padding:.85em 1.2em; background:var(--danger-bg);
   border-left:5px solid var(--danger-bd); border-radius:0 8px 8px 0; color:var(--danger-text); font-size:.97rem;}
-h3.done{padding:.55em .95em; background:#e6fafa; border-bottom:none;
-  border-left:5px solid var(--accent); border-radius:0 8px 8px 0; color:var(--accent-deep); font-size:1.05rem;}
+div.goal{margin:2.2em 0 2.4em; border:2px solid var(--accent); border-radius:10px; background:#f3fcfb; overflow:hidden;}
+div.goal .goal-label{padding:.5em 1em; background:var(--accent); color:#fff; font-weight:700; font-size:1.02rem; letter-spacing:.02em;}
+div.goal ul{margin:.6em 0 .7em; padding-left:2.4em; color:var(--accent-deep);}
+div.goal li{margin:.25em 0;}
 .blk-label{display:block; width:fit-content; margin:1.2em 0 0; line-height:1.6; padding:.15em .7em; border-radius:6px 6px 0 0; font-size:.78rem; font-weight:700; letter-spacing:.03em; color:#fff;}
 .blk-label + pre{margin-top:0; border-top-left-radius:0;}
 .blk-label.prompt{background:var(--accent);}
@@ -554,6 +556,8 @@ spec.md の形式
 - 傘の予約</code></pre>
 </details>
 
+<div class="goal"><div class="goal-label">✅ ゴール：ここまでできたら <a href="#s2" style="color:#fff">[2]</a> へ</div><ul><li>リポジトリ直下に <code>spec.md</code> があり、題材カードの条件3つがルールに入っている</li><li>push も済んでいる</li></ul></div>
+
 <h3 id="s2">[2] spec.md をもとにツールの画面をデザインする</h3>
 <p>作るのは<strong>ツールとして使う画面だけ</strong>です。サービスの紹介ページなどは作りません。</p>
 <ol>
@@ -615,6 +619,8 @@ spec.md の形式
 <p class="note">できたスキルのファイルは、ほかのファイルと同じく commit して push しておきます。班のみんなが同じスキルを使えるようになります。</p>
 </div>
 
+<div class="goal"><div class="goal-label">✅ ゴール：ここまでできたら <a href="#s3" style="color:#fff">[3]</a> へ</div><ul><li>リポジトリ直下（<code>package.json</code> と同じ場所）に <code>design.zip</code> がある</li></ul></div>
+
 <h3 id="s3">[3] フロントを実装する（モックデータ）</h3>
 <div class="blk-label prompt">Claude Code に送る</div>
 <pre><code>frontend/ に Vite + React + TypeScript + Tailwind CSS v4 + shadcn/ui で SPA を作って。
@@ -629,6 +635,8 @@ design.zip を展開して、デザインにある画面と機能を実装して
   <li>①〜④を実際に操作し、気になる点を Claude Code に伝えて直す。画面を直したら、2つ目のターミナルで <code>Ctrl + C</code> を押して止め、<code>npm run build --prefix frontend</code> と <code>npm run dev</code> をやり直す（2回目からは、画面だけを作り直すこのコマンドのほうが速い）。</li>
   <li>ここまでを commit して push する。main に push すると、作りかけの画面も公開されます。</li>
 </ol>
+
+<div class="goal"><div class="goal-label">✅ ゴール：ここまでできたら <a href="#s4" style="color:#fff">[4]</a> へ</div><ul><li><code>http://localhost:8787</code> で、ログインから ①〜④ までが仮のデータで一通り動く</li><li>push も済んでいる</li></ul></div>
 
 <h3 id="s4">[4] バックエンドを作り、フロントとつなぐ</h3>
 <p>まず API を作ります。</p>
@@ -665,6 +673,8 @@ npm run dev</code></pre>
 <p class="note"><code>npm run dev</code> で <code>Address already in use</code> と出たら、Claude Code が起動したサーバーが残っています。Claude Code に「起動しているサーバーを止めて」と頼むか、同じターミナルで <code>pkill -f "wrangler dev"</code> を実行してから、<code>npm run dev</code> をやり直します。</p>
 <p class="note">フロントのチェックは利用者の入力ミスを防ぐため、API のチェックはルールを確実に守るためのものです。<strong>フロントのチェックだけでは、API を直接呼ばれたら素通りしてしまいます。</strong>画面から操作する限りは正常に見えるので、抜けていても気づけません。そのため、API に直接リクエストを送る確認まで Claude Code にやらせています。</p>
 
+<div class="goal"><div class="goal-label">✅ ゴール：ここまでできたら <a href="#s5" style="color:#fff">[5]</a> へ</div><ul><li>再読み込みしてもデータが残る</li><li>Claude Code の報告で、ルール違反のリクエストが弾かれている</li></ul></div>
+
 <h3 id="s5">[5] 班の中で動作確認とコードレビュー</h3>
 <p><code>npm run dev</code> を動かしたまま、ブラウザで <code>http://localhost:8787</code> を開き、次を確認します。</p>
 <ul>
@@ -674,6 +684,8 @@ npm run dev</code></pre>
   <li>別のメールアドレスでログインし直すと、「自分のデータ」が切り替わる</li>
 </ul>
 <p>確認できたら Claude Code で <code>/code-review</code> と <code>/security-review</code> を実行します。指摘は自分たちで読んで、直すかどうかを判断してください（<code>--fix</code> は付けない）。直し終わったら commit します。</p>
+
+<div class="goal"><div class="goal-label">✅ ゴール：ここまでできたら <a href="#s6" style="color:#fff">[6]</a> へ</div><ul><li>上の確認がすべてできた</li><li><code>/code-review</code> と <code>/security-review</code> の指摘を読んで、直すかどうかを決めた</li></ul></div>
 
 <h3 id="s6">[6] 公開を確かめる</h3>
 <p>公開の準備は講師が済ませています。<strong>main に push すると、Cloudflare が自動でビルドして公開</strong>します。ここでは、[5] まで終わった状態が公開されているかを確かめます。</p>
@@ -698,6 +710,8 @@ npm run dev</code></pre>
 </details>
 <p class="note">数分たっても画面が変わらないときや、エラーの画面が出るときは、講師に伝えてください。</p>
 <p class="warn"><strong>公開した画面は、URL を知っていれば誰でも開いて書き込めます。</strong>次を守ってください。<br>・実在の個人情報や業務のデータは入れず、ダミーのデータだけを使う<br>・ログインには <code>taro@example.com</code> のようなダミーのメールアドレスを使う（一覧に表示されて、誰にでも見えるため）<br>・公開は発表までにとどめる。終わったら、講師の案内に従って片付ける</p>
+
+<div class="goal"><div class="goal-label">✅ ゴール：ここまでできたら <a href="#review" style="color:#fff">[7]</a> へ</div><ul><li>班の URL をスマートフォン（モバイル回線）で開いて、手元と同じように動く</li></ul></div>
 
 <h3 id="review">[7] 別の班に使ってもらい、意見をもらう（相互レビュー）</h3>
 <p>公開できたら、班のパソコンで自分たちのツールを開いたままにして、<strong>班全員で別の班のパソコンに回り、お互いのツールを使い合います</strong>。使ってみて気づいた、直してほしいところや追加でほしい機能は、相手の班のパソコンに用意されたファイルに書き残します。作った人は使い方を知っているので、初めて使う人がどこで迷うか、どこが足りないかに気づけません。<strong>初めて使う人の目で見てもらうことが、このワークでいちばん大事な手順です。</strong></p>
@@ -742,6 +756,8 @@ npm run dev</code></pre>
   <li>開いてある <code>feedback/review.md</code> の <code>&lt; &gt;</code> の部分に意見を書き込み、保存する。</li>
 </ol>
 <p class="note">「使いにくい」だけでは、相手は何を直せばよいか分かりません。<strong>何をしたら、何が起きたか</strong>まで書いてください。</p>
+
+<div class="goal"><div class="goal-label">✅ ゴール：ここまでできたら <a href="#extra" style="color:#fff">[8]</a> へ</div><ul><li>自分の班の <code>feedback/review.md</code> に、別の班の意見が書き込まれている</li></ul></div>
 
 <h3 id="extra">[8] もらった意見を反映する</h3>
 <p>[7] でもらった意見をもとに、ツールを直したり機能を足したりします。全部に対応する必要はありません。班で相談して、<strong>どれをやるか、やらないかを自分たちで決めて</strong>ください。</p>
@@ -798,6 +814,8 @@ npm run dev</code></pre>
 私たちが作る番号を伝えたら、spec.md を直して、そのあと実装して。</code></pre>
 <p>作ったら、テストのスキルをもう一度流して、全部 ○ になるかを確かめます。</p>
 <p class="note">迷ったときの例：一覧の検索・絞り込み、管理する人だけができる操作、変更の履歴を残す、件数やランキングの集計。どれも外部のサービスは要りません。</p>
+
+<div class="goal"><div class="goal-label">✅ ゴール：ここまでできたら完成</div><ul><li>テストのスキルの結果が全部 ○ になり、直したところが公開 URL に反映されている</li></ul></div>
 
 <p class="foot">Webツール開発ワークショップ</p>
 </article></div>
