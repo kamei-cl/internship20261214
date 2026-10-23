@@ -80,6 +80,9 @@ tbody tr:nth-child(even){background:#faf7ef}
 .flow i{color:var(--gold); font-style:normal;}
 .flow span.own{background:var(--warn-bg); border-color:var(--warn-bd); color:#7a4f2a;}
 .arch{width:100%; height:auto; display:block; margin:1.2em 0;}
+.quest{border:2px solid var(--gold); border-radius:12px; background:#fffcf3; padding:.4em 1.3em 1em; margin:1.6em 0;}
+.quest>h4{margin:.9em 0 .4em; color:#8a6a1f;}
+.quest>h4::before{content:"★ "; color:var(--gold);}
 .tbd{border:2px dashed var(--warn-bd); border-radius:10px; padding:.6em 1.2em; background:#fffaf0;}
 .tbd b{color:#a3661b;}
 details.spec{margin:1.1em 0; border:1px solid var(--line); border-radius:10px; background:#fbf9f2; padding:0 1.1em;}
@@ -176,6 +179,7 @@ body.slide-mode{overflow:hidden;}
   <a class="sub" href="#before">作業を始める前に</a>
   <a class="sub" href="#s1">[1] 要件の壁打ち</a>
   <a class="sub" href="#s2">[2] 画面をデザイン</a>
+  <a class="sub" href="#subquest">　★ サブクエスト</a>
   <a class="sub" href="#s3">[3] フロント実装</a>
   <a class="sub" href="#s4">[4] バックエンドと結合</a>
   <a class="sub" href="#s5">[5] 班の中で確認</a>
@@ -417,7 +421,7 @@ audit=true</code></pre>
 <thead><tr><th>手順</th><th>やること</th><th>目安</th></tr></thead>
 <tbody>
 <tr><td><a href="#s1">[1]</a></td><td>Claude Code と壁打ちして要件を決め、<code>spec.md</code> にまとめる</td><td>30分</td></tr>
-<tr><td><a href="#s2">[2]</a></td><td><code>spec.md</code> をもとにツールの画面をデザインし、zip を書き出す</td><td>30分</td></tr>
+<tr><td><a href="#s2">[2]</a></td><td><code>spec.md</code> をもとにツールの画面をデザインし、zip を書き出す。待ち時間に<a href="#subquest">サブクエスト</a>（スキル作り）</td><td>30分</td></tr>
 <tr><td><a href="#s3">[3]</a></td><td>フロントを実装する（モックデータで動かす）</td><td>60分</td></tr>
 <tr><td><a href="#s4">[4]</a></td><td>バックエンドを作り、フロントとつなぐ</td><td>75〜90分</td></tr>
 <tr><td><a href="#s5">[5]</a></td><td>班の中で動作確認とコードレビュー</td><td>20分</td></tr>
@@ -537,11 +541,45 @@ spec.md の形式
 &lt;spec.md の中身をそのまま貼る&gt;</code></pre>
 
 <ol start="3">
-  <li>Claude Design が質問フォームを出してくるので、班で相談して答える。使う端末、利用者数、メインの画面、案をいくつ比べるか、などを聞かれます。</li>
+  <li>Claude Design が質問フォームを出してくるので、班で相談して答える。使う端末、利用者数、メインの画面、案をいくつ比べるか、などを聞かれます。答えると画面の生成が始まり、しばらく待ちます。<strong>待っている間は、下の<a href="#subquest">サブクエスト</a>に取り組めます。</strong></li>
   <li>出てきた案を比べて1つ選び、チャットで直したいところを伝えて仕上げる。</li>
   <li>デザインの途中で機能やルールを変えたら、Claude Code に「spec.md を次のように直して」と頼み、spec.md も合わせて直す。</li>
   <li>Share → Export の「Claude Code」から <strong>Download .zip</strong> を選び、リポジトリ直下に <code>design.zip</code> として置く。</li>
 </ol>
+
+<div class="quest" id="subquest">
+<h4>サブクエスト：待ち時間にスキルを1つ作る（任意）</h4>
+<p>Claude Design が画面を作っている間、Claude Code の手は空いています。この時間を使って、<strong>この後の作業で役に立つスキルを1つ</strong>作ってみましょう。10分ほどで作れる、短い手順のもので十分です。終わらなくても、デザインができたら [3] に進んで構いません。</p>
+<p>何を作るかは班で選びます。迷ったら、<strong>発表スライドのスキル</strong>がおすすめです。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>スキルの案</th><th>何をするか</th><th>いつ役に立つか</th></tr></thead>
+<tbody>
+<tr><td><strong>発表スライド（おすすめ）</strong></td><td>spec.md（あれば画面やコードも）を読んで、発表用のスライド（ブラウザで開ける HTML）を作る</td><td>最後の発表。今の時点でも spec.md からスライドが作れ、[8] の後にもう一度使うと最新の内容で仕上がる</td></tr>
+<tr><td>commit メッセージ</td><td>変更を読んで、決まった形の commit メッセージを書いて commit する</td><td>手順が1つ終わるたびの commit</td></tr>
+<tr><td>spec.md の点検</td><td>spec.md に題材カードの条件が全部入っているか、ルールに「違反したらどうなるか」が書いてあるかを確かめる</td><td>spec.md を直したとき</td></tr>
+<tr><td>言葉の解説</td><td>Claude Code の返事に出てきた分からない言葉を、やさしく説明する</td><td>作業中いつでも</td></tr>
+</tbody></table></div>
+
+<p><strong>発表スライドのスキルを作る場合</strong></p>
+<div class="blk-label prompt">Claude Code に送る</div>
+<pre><code>発表用のスライドを作るスキルを、.claude/skills/ に作って。
+- spec.md を読み、frontend/ や backend/ があればそれも読んで、作ったツールの発表スライドを作る。公開した URL や重要な会話がメモリにあれば、それも参照する
+- スライドは、リポジトリ直下の presentation.html に作る。ブラウザで開いて、← → キーでめくれる1つの HTML ファイルにする
+- 構成は次の順：ツール名と、依頼者・困っていること → 作ったものの紹介（機能やデザイン） → 工夫したルール（固有ロジック） → デモの流れ（使い方） → やってみての感想（ここは空欄で残す）
+- 枚数や見た目は任せる。発表で見やすいように、1枚に詰め込みすぎない
+- 公開した URL が分からなければ、私たちに聞く
+- 何度使っても、その時点の最新の内容で作り直す
+作ったら、どう呼び出せばよいかを教えて。スキルはまだ使わないで。</code></pre>
+<p class="note">スキルを使うと、リポジトリのフォルダに <code>presentation.html</code> ができます。エクスプローラーでダブルクリックすると、ブラウザで開けます。</p>
+
+<p><strong>ほかのスキルを作る場合</strong></p>
+<div class="blk-label prompt">Claude Code に送る</div>
+<pre><code>次のことをするスキルを、.claude/skills/ に作って。
+&lt;スキルにしたいこと（例：変更を読んで、決まった形の commit メッセージを書いて commit する）&gt;
+- 手順は短くし、1回数分で終わるものにする
+作ったら、どう呼び出せばよいかを教えて。そのあと一度使ってみて。</code></pre>
+<p class="note">できたスキルのファイルは、ほかのファイルと同じく commit して push しておきます。班のみんなが同じスキルを使えるようになります。</p>
+</div>
 
 <h3 id="s3">[3] フロントを実装する（モックデータ）</h3>
 <div class="blk-label prompt">Claude Code に送る</div>
@@ -689,6 +727,7 @@ npm run dev</code></pre>
   <li>動作を確かめて commit し（<code>feedback/</code> のファイルも一緒に）、main に push する。</li>
 </ol>
 <p>直して main に push すると、公開中のツールにも反映されます。時間があれば、意見をくれた班にもう一度見てもらいましょう。</p>
+<p class="note">サブクエストで発表スライドのスキルを作った班は、発表の前にもう一度使って、スライドを最新の内容に仕上げましょう。</p>
 
 <h4>自分たちで機能を足すとき（意見が少ないとき・時間が余ったとき）</h4>
 <p>次のプロンプトで、Claude Code に追加機能の案を出してもらいます。どの題材でも同じプロンプトを使い、外部のサービスを使わず、同じくらいの大きさの案になるよう条件を付けています。</p>
@@ -911,6 +950,7 @@ npm run dev</code></pre>
     <li>質問フォームが出たら、班で相談して答える</li>
     <li>出てきた案を<strong>比べて1つ選び</strong>、気になるところをチャットで直す</li>
     <li>できたら zip で書き出し、<strong>design.zip</strong> としてリポジトリに置く</li>
+    <li><strong>★ サブクエスト</strong>：画面を待つ間に、Claude Code でスキルを1つ作る（おすすめは発表スライドを作るスキル）</li>
   </ul>
 </section>
 
