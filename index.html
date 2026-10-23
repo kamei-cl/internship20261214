@@ -236,6 +236,9 @@ body.slide-mode{overflow:hidden;}
 docker compose up -d
 docker compose exec app bash</code></pre>
 <p>表示が <code>node@…:/work$</code> に変われば、コンテナの中に入れています。<strong>以後の作業（Claude Code、npm のコマンド）は、すべてこのコンテナの中で行います。</strong>コンテナの中の <code>/work</code> が、以降の説明でいう<strong>リポジトリ直下</strong>です。</p>
+<p>コンテナに入ったら、<strong>最初の1回だけ</strong>次を実行し、動かすのに必要なパッケージを入れます。</p>
+<div class="blk-label term">ターミナルで実行</div>
+<pre class="term"><code>npm install</code></pre>
 <ul>
   <li>2つ目のターミナルが必要なとき（<code>npm run dev</code> を動かしたままにするときなど）は、PowerShell をもう1つ開き、<code>cd &lt;フォルダの場所&gt;</code> と <code>docker compose exec app bash</code> で同じコンテナに入ります。</li>
   <li>終わるときは、コンテナの中で <code>exit</code> と打って出てから、<code>docker compose down</code> で止めます。ファイルはパソコン側のフォルダに残ります。</li>
@@ -247,20 +250,25 @@ docker compose exec app bash</code></pre>
 <div class="blk-label ref">参考（実行しない）</div>
 <pre><code>リポジトリ直下/
 ├── package.json        ← 動かすためのコマンド（dev / build / db:migrate:local など）
+├── package-lock.json   ← 入れるパッケージの版を固定した一覧
 ├── wrangler.jsonc      ← 公開先と DB の設定
 ├── scripts/            ← 画面をビルドする仕組み
-├── Dockerfile、compose.yaml ← コンテナ（手元の作業環境）の設定
+├── Dockerfile、compose.yaml、bootstrap.yaml ← コンテナ（手元の作業環境）の設定
 ├── placeholder/        ← 画面ができる前に表示する「準備中」のページ
 ├── .claude/settings.json ← ① Claude Code にさせない操作の設定
 ├── .npmrc              ← ② 怪しいパッケージを入れない設定
 ├── .gitignore          ← commit しないファイルの一覧
+├── .gitattributes、.dockerignore ← git と Docker の細かい設定
 ├── CLAUDE.md           ← Claude Code への注意書き（触らないファイルとその理由）
+├── README.md           ← このリポジトリの説明
+├── clerk-keys.md       ← 講師のお題で使うファイル。お題が出るまで使わない
 └── backend/            ← API の雛形（[4] でここに書く）
     ├── src/index.ts    ← API。動作確認用の /api/health だけ入っている
+    ├── tsconfig.json   ← TypeScript の設定
     └── migrations/     ← 空。[4] でテーブル定義を足す</code></pre>
-<p class="warn"><code>wrangler.jsonc</code>、<code>scripts/</code>、<code>.claude/</code> の設定ファイル、<code>Dockerfile</code>、<code>compose.yaml</code>、<code>package.json</code> の scripts は講師が管理しています。<strong>変更しないでください。</strong>変更すると公開や手元の環境が壊れます。<code>.claude/skills/</code> にスキルを作るのは構いません。</p>
+<p class="warn"><code>wrangler.jsonc</code>、<code>scripts/</code>、<code>.claude/</code> の設定ファイル、<code>Dockerfile</code>、<code>compose.yaml</code>、<code>bootstrap.yaml</code>、<code>package.json</code> の scripts は講師が管理しています。<strong>変更しないでください。</strong>変更すると公開や手元の環境が壊れます。<code>.claude/skills/</code> にスキルを作るのは構いません。</p>
 
-<p><strong>① <code>.claude/settings.json</code></strong>：秘密情報を Claude Code に読ませない設定と、講師のファイルを編集させない設定</p>
+<p><strong>① <code>.claude/settings.json</code></strong>：秘密情報を Claude Code に読ませない設定と、講師のファイルの一部を編集させない設定</p>
 <div class="blk-label ref">参考（実行しない）：.claude/settings.json</div>
 <pre><code>{
   "permissions": {
@@ -277,7 +285,7 @@ docker compose exec app bash</code></pre>
 }</code></pre>
 <details class="spec"><summary>この設定の意味を見る</summary>
 <ul>
-  <li><code>permissions.deny</code>：Claude Code に<strong>させない操作</strong>の一覧です。ここに書いた操作は、Claude Code が頼まれても実行しません。</li>
+  <li><code>permissions.deny</code>：Claude Code に<strong>させない操作</strong>の一覧です。Claude Code がファイルを読む・書き換える機能では、ここに書いた操作は頼まれても行いません。ただし、ターミナルのコマンド（<code>cat</code> など）を通した操作までは止められません。そのため、触らないファイルは <code>CLAUDE.md</code> の注意書きでも伝えています。</li>
   <li><code>Read(./**/.dev.vars)</code>：どのフォルダにある <code>.dev.vars</code> も読ませない。<code>**</code> は「すべてのフォルダ」という意味です。<code>.dev.vars</code> は Cloudflare Workers で、手元で動かすときのパスワードや API キーを書くファイルです。</li>
   <li><code>Read(./**/.env)</code>、<code>Read(./**/.env.*)</code>：<code>.env</code> や <code>.env.local</code> なども読ませない。秘密情報を書く定番のファイルです。</li>
   <li><code>Read(./secrets/**)</code>：<code>secrets</code> フォルダの中身はすべて読ませない。</li>
@@ -432,7 +440,7 @@ audit=true</code></pre>
 <tbody>
 <tr><td><a href="#s1">[1]</a></td><td>Claude Code と壁打ちして要件を決め、<code>spec.md</code> にまとめる</td><td>30分</td></tr>
 <tr><td><a href="#s2">[2]</a></td><td><code>spec.md</code> をもとにツールの画面をデザインし、zip を書き出す。待ち時間に<a href="#subquest">サブクエスト</a>（スキル作り）</td><td>30分</td></tr>
-<tr><td><a href="#s3">[3]</a></td><td>フロントを実装する（モックデータで動かす）</td><td>60分</td></tr>
+<tr><td><a href="#s3">[3]</a></td><td>フロントを実装する（モックデータ＝仮のデータで動かす）</td><td>60分</td></tr>
 <tr><td><a href="#s4">[4]</a></td><td>バックエンドを作り、フロントとつなぐ</td><td>75〜90分</td></tr>
 <tr><td><a href="#s5">[5]</a></td><td>班の中で動作確認とコードレビュー</td><td>20分</td></tr>
 <tr><td><a href="#s6">[6]</a></td><td>公開を確かめる</td><td>10分</td></tr>
@@ -452,9 +460,18 @@ audit=true</code></pre>
   <li><strong>こまめに commit して push する</strong>：手順が1つ終わるたびに、main に commit して push してください。途中で壊れても、うまく動いていたところまで戻れます。Claude Code に「ここまでを commit して push して」と頼めば実行してくれます。リポジトリは講師が用意したものを使い、フォークやブランチは使いません。</li>
   <li><strong>main に入れたものは公開される</strong>：main に push するたびに、自動で公開されます（画面を作る前は「準備中」のページ）。手元から deploy はしません。</li>
   <li><strong>講師のファイルを変えない</strong>：<code>wrangler.jsonc</code>、<code>scripts/</code>、<code>.claude/</code> の設定ファイル、<code>Dockerfile</code>、<code>compose.yaml</code>、<code>package.json</code> の scripts は変更しないでください（<a href="#files">最初から入っているファイル</a>）。</li>
-  <li><strong>秘密の値を渡さない</strong>：パスワードや API キーなどの秘密の値は、commit しないでください。Claude Code のチャットにも貼らないでください。秘密の値は <code>backend/.dev.vars</code> に書き、Claude Code には名前だけを伝えます（事前準備の設定で、Claude Code は <code>.dev.vars</code> を読めないようにしてあります）。</li>
+  <li><strong>秘密の値を渡さない</strong>：今回のツールでは、パスワードや API キーなどの秘密の値は使いません。もし手元にあっても、commit しないでください。Claude Code のチャットにも貼らないでください。</li>
   <li><strong>困ったら Claude Code に相談する</strong>：エラーが出たり、思ったとおりに動かなかったりしたら、エラーメッセージと「何をしたら、何が起きたか」をそのまま Claude Code に貼って、相談しながら進めてください。公開がうまくいかないとき（push しても画面が変わらない、エラーの画面が出る）は、講師に伝えてください。</li>
 </ul>
+<details class="spec"><summary>commit・push・main とは（分からなければ開く）</summary>
+<ul>
+  <li><strong>リポジトリ</strong>：ファイルと、その変更の履歴をまとめて入れておく場所です。班に1つあり、パソコンの中と GitHub の両方にあります。</li>
+  <li><strong>commit</strong>：今のファイルの状態を、ひとことのメモを付けて履歴に記録することです。パソコンの中のリポジトリに記録されます。記録した時点には、あとから戻れます。</li>
+  <li><strong>push</strong>：パソコンの中で記録した commit を、GitHub に送ることです。</li>
+  <li><strong>main</strong>：リポジトリの本流の名前です。今回は main だけを使い、main に push すると自動で公開されます。</li>
+</ul>
+<p>どれも、Claude Code に「ここまでを commit して push して」と頼めば実行してくれます。</p>
+</details>
 
 <h3 id="s1">[1] 壁打ちで要件を決め、spec.md にまとめる</h3>
 <p>いきなり画面を作らず、まず<strong>何を作るか</strong>を班で決めます。Claude Code に<strong>聞き役</strong>をしてもらい、質問に答えながら機能やルールを炙り出します。決めるのは自分たちで、AI は質問と整理を手伝うだけです。</p>
@@ -464,7 +481,7 @@ audit=true</code></pre>
   <li>自分の題材カードを開いて「カードの中身をコピー」を押し、プロンプトの <code>&lt; &gt;</code> の行と置き換えて送る。書き換えるのは<strong>この1か所だけ</strong>です。</li>
   <li>質問に1つずつ、班で相談して答える。迷ったら題材カードの「ヒント：機能の例」も見てよい。</li>
   <li>最後にまとめが出たら読み合わせ、直したいところを伝える。OK と答えると <code>spec.md</code> が書き出される。</li>
-  <li><code>spec.md</code> を commit する。</li>
+  <li><code>spec.md</code> を commit して push する。Claude Code に「ここまでを commit して push して」と頼めば実行してくれます。</li>
 </ol>
 <div class="blk-label prompt">Claude Code に送る</div>
 <pre><code>社内向けの Web ツールを作る前に、要件を一緒に整理したい。
@@ -556,6 +573,13 @@ spec.md の形式
   <li>デザインの途中で機能やルールを変えたら、Claude Code に「spec.md を次のように直して」と頼み、spec.md も合わせて直す。</li>
   <li>Share → Export の「Claude Code」から <strong>Download .zip</strong> を選び、リポジトリ直下に <code>design.zip</code> として置く。</li>
 </ol>
+<details class="spec"><summary>zip をリポジトリに置く方法を見る</summary>
+<ol>
+  <li>エクスプローラーを開き、「ダウンロード」フォルダにある、今ダウンロードした zip を探す。</li>
+  <li>zip を右クリックして「名前の変更」を選び、<code>design.zip</code> にする。名前の最後に <code>.zip</code> が表示されていないときは、<code>design</code> とだけ入力する（<code>design.zip.zip</code> にならないように）。</li>
+  <li>zip を、<a href="#repo">事前準備</a>で移動したリポジトリのフォルダ（<code>&lt;フォルダの場所&gt;</code>）にドラッグして移す。<code>package.json</code> や <code>CLAUDE.md</code> と同じ場所に置けていれば大丈夫です。</li>
+</ol>
+</details>
 
 <div class="quest" id="subquest">
 <h4>サブクエスト：待ち時間にスキルを1つ作る（任意）</h4>
@@ -601,9 +625,9 @@ design.zip を展開して、デザインにある画面と機能を実装して
 ログインはメールアドレスだけを入力する簡易ログインにして、ログインするまで他の画面は見せないこと。
 この段階では API がないので、データはモックで表示して。</code></pre>
 <ol>
-  <li>2つ目のターミナルでコンテナに入り、リポジトリ直下で <code>npm run build</code> と <code>npm run dev</code> を1行ずつ実行する。パソコンのブラウザで <code>http://localhost:8787</code> を開く。画面を直したら、<code>Ctrl + C</code> で止めて、<code>npm run build</code> と <code>npm run dev</code> をやり直す。</li>
-  <li>①〜④を実際に操作し、気になる点を Claude Code に伝えて直す。</li>
-  <li>ここで一度 commit する。main に push すると、作りかけの画面も公開されます。</li>
+  <li>2つ目のターミナルでコンテナに入り、リポジトリ直下で <code>npm run build</code> と <code>npm run dev</code> を1行ずつ実行する。パソコンのブラウザで <code>http://localhost:8787</code> を開く。</li>
+  <li>①〜④を実際に操作し、気になる点を Claude Code に伝えて直す。画面を直したら、2つ目のターミナルで <code>Ctrl + C</code> を押して止め、<code>npm run build --prefix frontend</code> と <code>npm run dev</code> をやり直す（2回目からは、画面だけを作り直すこのコマンドのほうが速い）。</li>
+  <li>ここまでを commit して push する。main に push すると、作りかけの画面も公開されます。</li>
 </ol>
 
 <h3 id="s4">[4] バックエンドを作り、フロントとつなぐ</h3>
@@ -614,6 +638,7 @@ design.zip を展開して、デザインにある画面と機能を実装して
 - テーブル定義は backend/migrations/ に SQL で足す。DB は雛形で設定済みの D1（バインディング名 DB）を使う
 - ログインは簡易版でよい。リクエストヘッダ x-user-email のメールアドレスを本人とみなす
 - wrangler.jsonc、scripts/、package.json の scripts は変更しない
+- 確かめるために手元のサーバーを起動したら、終わったあとに必ず止める（私たちが別のターミナルで起動するため）
 
 依頼者からの最初の条件は次のとおり。
 &lt;題材カードの「依頼者からの条件」をそのまま貼る&gt;
@@ -636,15 +661,16 @@ design.zip を展開して、デザインにある画面と機能を実装して
 npm run db:migrate:local
 npm run build
 npm run dev</code></pre>
-<p class="note"><code>npm run dev</code> のあと、<code>http://localhost:8787</code> をブラウザで開きます。<code>npm run dev</code> は起動したまま動き続けます。止めるときは <code>Ctrl + C</code> を押します。画面を直したら、止めてから <code>npm run build</code> と <code>npm run dev</code> をやり直します。</p>
+<p class="note"><code>npm run dev</code> のあと、<code>http://localhost:8787</code> をブラウザで開きます。<code>npm run dev</code> は起動したまま動き続けます。止めるときは <code>Ctrl + C</code> を押します。画面を直したら、止めてから <code>npm run build --prefix frontend</code> と <code>npm run dev</code> をやり直します。</p>
+<p class="note"><code>npm run dev</code> で <code>Address already in use</code> と出たら、Claude Code が起動したサーバーが残っています。Claude Code に「起動しているサーバーを止めて」と頼むか、同じターミナルで <code>pkill -f "wrangler dev"</code> を実行してから、<code>npm run dev</code> をやり直します。</p>
 <p class="note">フロントのチェックは利用者の入力ミスを防ぐため、API のチェックはルールを確実に守るためのものです。<strong>フロントのチェックだけでは、API を直接呼ばれたら素通りしてしまいます。</strong>画面から操作する限りは正常に見えるので、抜けていても気づけません。そのため、API に直接リクエストを送る確認まで Claude Code にやらせています。</p>
 
 <h3 id="s5">[5] 班の中で動作確認とコードレビュー</h3>
-<p><code>npm run dev</code> で表示された URL を開き、次を確認します。</p>
+<p><code>npm run dev</code> を動かしたまま、ブラウザで <code>http://localhost:8787</code> を開き、次を確認します。</p>
 <ul>
   <li>①〜④が画面から一通りできる</li>
   <li>再読み込みしても、登録したデータが残っている</li>
-  <li>ルール違反の操作でエラーが出る。DevTools の Network タブで、<code>/api/...</code> が 4xx を返していることも見る</li>
+  <li>ルール違反の操作でエラーが出る。DevTools（ブラウザで F12 キーを押すと開く）の Network タブで、<code>/api/...</code> が 4xx を返していることも見る</li>
   <li>別のメールアドレスでログインし直すと、「自分のデータ」が切り替わる</li>
 </ul>
 <p>確認できたら Claude Code で <code>/code-review</code> と <code>/security-review</code> を実行します。指摘は自分たちで読んで、直すかどうかを判断してください（<code>--fix</code> は付けない）。直し終わったら commit します。</p>
@@ -700,7 +726,7 @@ npm run dev</code></pre>
 - &lt;よかったところ&gt;
 ここまで</code></pre>
 <ol start="3">
-  <li>できた <code>feedback/review.md</code> を、メモ帳で開いた状態にしておく。<strong>コンテナの外</strong>（PowerShell で、コンテナに入っていないターミナル）で、リポジトリのフォルダに移動してから次のコマンドを実行すると開けます。</li>
+  <li>できた <code>feedback/review.md</code> を、メモ帳で開いた状態にしておく。<strong>コンテナの外</strong>（PowerShell で、コンテナに入っていないターミナル）で、リポジトリのフォルダに移動してから次のコマンドを実行すると開けます。今ある2つのターミナルはどちらもコンテナの中なので、PowerShell をもう1つ開き、<code>cd &lt;フォルダの場所&gt;</code> で移動してから実行します。</li>
 </ol>
 <div class="blk-label term">ターミナルで実行</div>
 <pre class="term"><code>notepad feedback\review.md</code></pre>
@@ -754,6 +780,7 @@ npm run dev</code></pre>
   <li>もう一度テストのスキルを流す。新しい機能やルールの項目も <code>tests.md</code> に足され、<strong>前からの項目も含めて全部 ○</strong> になるかを確かめる。</li>
   <li>動作を確かめて commit し（<code>feedback/</code> と <code>tests.md</code> も一緒に）、main に push する。</li>
 </ol>
+<p class="note">実装でテーブルが増えたり変わったりしたとき（<code>backend/migrations/</code> にファイルが足されたとき）は、テストを流す前に、2つ目のターミナルで <code>Ctrl + C</code> を押して止め、<code>npm run db:migrate:local</code>、<code>npm run build</code>、<code>npm run dev</code> を1行ずつやり直します。下の「自分たちで機能を足すとき」も同じです。</p>
 <p>直して main に push すると、公開中のツールにも反映されます。時間があれば、意見をくれた班にもう一度見てもらいましょう。</p>
 <p class="note">サブクエストで発表スライドのスキルを作った班は、発表の前にもう一度使って、スライドを最新の内容に仕上げましょう。</p>
 
@@ -843,7 +870,7 @@ npm run dev</code></pre>
 ├── backend/       <i>[4] API とテーブル定義。雛形は講師が用意</i>
 ├── <b>package.json</b>   <i>講師：動かすためのコマンド</i>
 ├── <b>wrangler.jsonc</b> <i>講師：公開先と DB の設定</i>
-├── <b>.claude/</b>       <i>講師：Claude Code にさせない操作の設定</i>
+├── <b>.claude/</b>       <i>講師：Claude Code にさせない操作の設定（skills/ にスキルを作るのはよい）</i>
 └── <b>CLAUDE.md</b>      <i>講師：Claude Code への注意書き</i></div>
   <p>手順が進むごとに、上から順にファイルが増えていく。<strong>講師のファイル（色付き）は変えない</strong></p>
 </section>
@@ -911,13 +938,13 @@ npm run dev</code></pre>
   <table>
     <tbody>
       <tr><td>[1]</td><td>壁打ちで要件を決め、spec.md にまとめる</td><td>30分</td></tr>
-      <tr><td>[2]</td><td>画面をデザインする（Claude Design）</td><td>30分</td></tr>
-      <tr><td>[3]</td><td>フロントを作る（まずはモックデータ）</td><td>60分</td></tr>
+      <tr><td>[2]</td><td>画面をデザインする（Claude Design）。待ち時間にサブクエスト</td><td>30分</td></tr>
+      <tr><td>[3]</td><td>フロントを作る（まずはモックデータ＝仮のデータ）</td><td>60分</td></tr>
       <tr><td>[4]</td><td>API とデータベースを作り、つなぐ</td><td>75〜90分</td></tr>
       <tr><td>[5]</td><td>班の中で動作確認とコードレビュー</td><td>20分</td></tr>
       <tr><td>[6]</td><td>公開を確かめる</td><td>10分</td></tr>
       <tr><td>[7]</td><td><strong>別の班に使ってもらう</strong></td><td>30分</td></tr>
-      <tr><td>[8]</td><td>もらった意見を反映する</td><td>残り</td></tr>
+      <tr><td>[8]</td><td>テストのスキルを作り、もらった意見を反映する</td><td>残り</td></tr>
     </tbody>
   </table>
 </section>
@@ -991,7 +1018,7 @@ npm run dev</code></pre>
     <li>この段階では、データは<strong>仮のデータ（モック）</strong>で表示する</li>
     <li>データベースが無くても、<strong>画面の流れを先に確かめられる</strong>のがポイント</li>
     <li>ブラウザで ①〜④ を操作し、気になるところを Claude Code に伝えて直す</li>
-    <li>できたら commit</li>
+    <li>できたら commit して push。<strong>作りかけの画面も公開される</strong></li>
   </ul>
 </section>
 
@@ -1026,7 +1053,7 @@ npm run dev</code></pre>
     <li>ルール違反の操作で、ちゃんとエラーになる</li>
     <li>別のメールアドレスでログインすると、「自分のデータ」が切り替わる</li>
   </ul>
-  <p>最後に Claude Code にコードを<strong>点検</strong>してもらう。指摘を直すかどうかは<strong>自分たちで判断</strong>する</p>
+  <p>最後に <strong>/code-review</strong> と <strong>/security-review</strong> で、Claude Code にコードを<strong>点検</strong>してもらう。指摘を直すかどうかは<strong>自分たちで判断</strong>する</p>
 </section>
 
 <section class="slide">
@@ -1073,7 +1100,7 @@ npm run dev</code></pre>
   <h2>作業中に守ること</h2>
   <ul>
     <li><strong>こまめに commit と push</strong>：手順が1つ終わるたびに、main へ。Claude Code に頼めばよい</li>
-    <li><strong>秘密の値を渡さない</strong>：commit しない、Claude Code のチャットにも貼らない</li>
+    <li><strong>秘密の値を渡さない</strong>：今回は使わない。もし手元にあっても、commit しない、Claude Code のチャットにも貼らない</li>
     <li><strong>講師のファイルを変えない</strong>：wrangler.jsonc、scripts/、.claude/ など</li>
     <li><strong>公開した画面にはダミーのデータだけ</strong>：ログインは taro@example.com のようなダミーで</li>
     <li><strong>困ったら Claude Code に相談</strong>：エラーと「何をしたら何が起きたか」を貼る</li>
@@ -1083,7 +1110,7 @@ npm run dev</code></pre>
 <section class="slide title">
   <h2>はじめましょう</h2>
   <ol>
-    <li>資料の<strong>「事前準備」</strong>で、リポジトリのフォルダに移動し、コンテナに入る</li>
+    <li>資料の<strong>「事前準備」</strong>で、リポジトリのフォルダに移動してコンテナに入り、<strong>npm install</strong> を実行する</li>
     <li><strong>題材カード</strong>を読んで、班で題材を1つ選ぶ</li>
     <li>資料の <strong>[1]</strong> のプロンプトで、壁打ちを始める</li>
   </ol>

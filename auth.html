@@ -249,14 +249,16 @@ p.tier{margin:1.8em 0 .4em; font-size:.85rem; font-weight:700; color:#a3661b; le
 - 公開鍵は公開してよい値なので、backend/src/ の設定用のファイルに定数として書く
 - 署名、有効期限（exp と nbf）、どのサイトから来たか（azp）を確かめる。azp で許可するのは、次の2つ
   http://localhost:8787
-  &lt;自分たちの班の公開 URL&gt;
+  &lt;自分たちの班の公開 URL（例：https://team-a.xxxx.workers.dev のように https:// から書き、最後に / を付けない）&gt;
 - 確かめられないときは 401 を返す
 - 本人の識別には、トークンの sub（Clerk のユーザー ID）を使う。テーブルの変更が要るなら backend/migrations/ に足す
 - wrangler.jsonc、scripts/、package.json の scripts は変更しない
+- 確かめるために手元のサーバーを起動したら、終わったあとに必ず止める（私たちが別のターミナルで起動するため）
 
 実装が終わったら、次の2つを報告して。
 1. トークンを付けずに API を呼ぶと 401 になること
 2. x-user-email に他人のメールアドレスを入れて API を呼んでも、なりすませないこと</code></pre>
+<p class="note">プロンプトに出てくる言葉：<strong>Authorization ヘッダ（Bearer）</strong>は、証明書を API に渡すときの決まった書き方です。<strong>azp</strong> は、証明書に書かれた「どのサイトの画面でログインしたか」で、許可していないサイトから来た証明書を断るために確かめます。<strong>sub</strong> は、証明書に書かれたユーザー ID です。</p>
 <p>終わったら、本編の [4] と同じく、2つ目のターミナル（コンテナの中）のリポジトリ直下で1行ずつ実行して、手元で確かめます。テーブルを変えたときは、<code>npm run db:migrate:local</code> も忘れずに実行します。</p>
 <div class="blk-label term">ターミナルで実行</div>
 <pre class="term"><code>npm install
