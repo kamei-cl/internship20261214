@@ -854,12 +854,12 @@ npm run dev</code></pre>
 
 <section class="slide">
   <div class="kicker">作るものの全体像 1/4</div>
-  <h2>画面と API を、1つの Worker から届ける</h2>
-  <div class="arch3"><div>ブラウザ<br><span class="muted">画面を表示</span></div><i>→</i><div class="w">Cloudflare Worker（1つ）<br><span class="muted">画面のファイル ＋ API（/api/...）</span></div><i>→</i><div>D1<br><span class="muted">データベース</span></div></div>
+  <h2>作るツールは、3つの役割でできている</h2>
+  <div class="arch3"><div>画面<br><span class="muted">使う人が見て操作する</span></div><i>→</i><div class="w">API<br><span class="muted">ルールを確かめる係</span></div><i>→</i><div>データベース<br><span class="muted">データをしまう場所</span></div></div>
+  <p class="example">例（会議室予約）：「予約する」を押す → API が空いているか確かめる → 空いていれば保存、埋まっていれば「予約済みです」と返す</p>
   <ul>
-    <li>画面も API も<strong>同じ場所</strong>から出るので、画面は <strong>/api/...</strong> を呼ぶだけで済む</li>
-    <li>データは D1 に保存するので、<strong>再読み込みしても消えない</strong></li>
-    <li>ルールの判定（ダブルブッキングを防ぐ、など）は <strong>API の中</strong>で行う</li>
+    <li>データはデータベースにしまうので、<strong>再読み込みしても消えない</strong></li>
+    <li>画面と API は、<strong>まとめて1か所（Cloudflare）</strong>に置いて公開する</li>
   </ul>
 </section>
 
