@@ -221,29 +221,21 @@ body.slide-mode{overflow:hidden;}
 
 <h3 id="setup">事前準備</h3>
 <ul>
-  <li><strong>アカウント</strong>：Claude（Pro 以上）。班のリポジトリと公開の準備（GitHub・Cloudflare）は講師が済ませているので、自分で用意する必要はありません</li>
-  <li><strong>ツール</strong>：Docker Desktop（講師が用意済み）。Claude Code、Node.js、git は<strong>コンテナ</strong>（パソコンの中に用意された、作業用の小さな環境）の中に入っているので、パソコンに入れる必要はありません。Claude Code のログインも講師が済ませています</li>
+  <li><strong>アカウント</strong>：自分で用意する必要はありません。班のリポジトリと公開の準備（GitHub・Cloudflare）、Claude Code のログインは講師が済ませています</li>
+  <li><strong>ツール</strong>：Docker Desktop（講師が用意済み）。Claude Code、Node.js、git は<strong>コンテナ</strong>（パソコンの中に用意された、作業用の小さな環境）の中に入っているので、パソコンに入れる必要はありません。動かすのに必要なパッケージも、講師が入れてあります</li>
 </ul>
 <h4 id="repo">リポジトリのフォルダに移動し、コンテナに入る</h4>
-<p>作業に使うリポジトリは、講師があらかじめパソコンに用意しています。</p>
-<div class="tbd">
-  <p><b>【未定】リポジトリの場所は当日講師から指示します。</b></p>
-  <ul>
-    <li>フォルダの場所：<code>&lt;当日指示&gt;</code></li>
-  </ul>
-</div>
-<p>ターミナルを開きます。タスクバーの Windows のマーク（スタート）を押して「PowerShell」と入力し、出てきた「Windows PowerShell」を選ぶと開けます。開いたら次を1行ずつ実行し、そのフォルダに移動してコンテナに入ります。<code>&lt; &gt;</code> は記号ごと、上の値に置き換えてください。</p>
+<p>作業に使うリポジトリとコンテナは、講師があらかじめパソコンに用意しています。参加者は、コンテナに入るところから始めます。</p>
+<p>リポジトリのフォルダは、どの班も <code>~/workshop/tool</code> です（エクスプローラーでは <code>C:\Users\&lt;ユーザー名&gt;\workshop\tool</code>）。</p>
+<p>ターミナルを開きます。タスクバーの Windows のマーク（スタート）を押して「PowerShell」と入力し、出てきた「Windows PowerShell」を選ぶと開けます。開いたら次を1行ずつ実行し、そのフォルダに移動してコンテナに入ります。</p>
 <div class="blk-label term">ターミナルで実行</div>
-<pre class="term"><code>cd &lt;フォルダの場所&gt;
-docker compose up -d
+<pre class="term"><code>cd ~/workshop/tool
 docker compose exec app bash</code></pre>
+<p class="note"><code>service "app" is not running</code> と出たら、コンテナが止まっています。<code>docker compose up -d</code> を実行してから、もう一度 <code>docker compose exec app bash</code> を実行します。</p>
 <p>表示が <code>node@…:/work$</code> に変われば、コンテナの中に入れています。<strong>以後の作業（Claude Code、npm のコマンド）は、すべてこのコンテナの中で行います。</strong>コンテナの中の <code>/work</code> が、以降の説明でいう<strong>リポジトリ直下</strong>です。</p>
-<p>コンテナに入ったら、<strong>最初の1回だけ</strong>次を実行し、動かすのに必要なパッケージを入れます。</p>
-<div class="blk-label term">ターミナルで実行</div>
-<pre class="term"><code>npm install</code></pre>
 <ul>
-  <li>2つ目のターミナルが必要なとき（<code>npm run dev</code> を動かしたままにするときなど）は、PowerShell をもう1つ開き、<code>cd &lt;フォルダの場所&gt;</code> と <code>docker compose exec app bash</code> で同じコンテナに入ります。</li>
-  <li>終わるときは、コンテナの中で <code>exit</code> と打って出てから、<code>docker compose down</code> で止めます。ファイルはパソコン側のフォルダに残ります。</li>
+  <li>2つ目のターミナルが必要なとき（<code>npm run dev</code> を動かしたままにするときなど）は、PowerShell をもう1つ開き、<code>cd ~/workshop/tool</code> と <code>docker compose exec app bash</code> で同じコンテナに入ります。</li>
+  <li>終わるときは、コンテナの中で <code>exit</code> と打って出ます。コンテナは止めずに、そのままにしておきます（片付けは講師が行います）。ファイルはパソコン側のフォルダに残ります。</li>
 </ul>
 <p class="note">コンテナの中で作ったファイルは、パソコン側のフォルダにもそのまま出ます。メモ帳やエクスプローラーで開くときは、パソコン側のフォルダを開きます。</p>
 
@@ -581,7 +573,7 @@ spec.md の形式
 <ol>
   <li>エクスプローラーを開き、「ダウンロード」フォルダにある、今ダウンロードした zip を探す。</li>
   <li>zip を右クリックして「名前の変更」を選び、<code>design.zip</code> にする。名前の最後に <code>.zip</code> が表示されていないときは、<code>design</code> とだけ入力する（<code>design.zip.zip</code> にならないように）。</li>
-  <li>zip を、<a href="#repo">事前準備</a>で移動したリポジトリのフォルダ（<code>&lt;フォルダの場所&gt;</code>）にドラッグして移す。<code>package.json</code> や <code>CLAUDE.md</code> と同じ場所に置けていれば大丈夫です。</li>
+  <li>zip を、<a href="#repo">事前準備</a>で移動したリポジトリのフォルダにドラッグして移す。エクスプローラーのアドレス欄に <code>%USERPROFILE%\workshop\tool</code> と入れて Enter を押すと開ける。<code>package.json</code> や <code>CLAUDE.md</code> と同じ場所に置けていれば大丈夫です。</li>
 </ol>
 </details>
 
@@ -740,7 +732,7 @@ npm run dev</code></pre>
 - &lt;よかったところ&gt;
 ここまで</code></pre>
 <ol start="3">
-  <li>できた <code>feedback/review.md</code> を、メモ帳で開いた状態にしておく。<strong>コンテナの外</strong>（PowerShell で、コンテナに入っていないターミナル）で、リポジトリのフォルダに移動してから次のコマンドを実行すると開けます。今ある2つのターミナルはどちらもコンテナの中なので、PowerShell をもう1つ開き、<code>cd &lt;フォルダの場所&gt;</code> で移動してから実行します。</li>
+  <li>できた <code>feedback/review.md</code> を、メモ帳で開いた状態にしておく。<strong>コンテナの外</strong>（PowerShell で、コンテナに入っていないターミナル）で、リポジトリのフォルダに移動してから次のコマンドを実行すると開けます。今ある2つのターミナルはどちらもコンテナの中なので、PowerShell をもう1つ開き、<code>cd ~/workshop/tool</code> で移動してから実行します。</li>
 </ol>
 <div class="blk-label term">ターミナルで実行</div>
 <pre class="term"><code>notepad feedback\review.md</code></pre>
@@ -1128,7 +1120,7 @@ npm run dev</code></pre>
 <section class="slide title">
   <h2>はじめましょう</h2>
   <ol>
-    <li>資料の<strong>「事前準備」</strong>で、リポジトリのフォルダに移動してコンテナに入り、<strong>npm install</strong> を実行する</li>
+    <li>資料の<strong>「事前準備」</strong>で、リポジトリのフォルダに移動し、コンテナに入る</li>
     <li><strong>題材カード</strong>を読んで、班で題材を1つ選ぶ</li>
     <li>資料の <strong>[1]</strong> のプロンプトで、壁打ちを始める</li>
   </ol>
